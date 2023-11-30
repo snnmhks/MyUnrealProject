@@ -86,6 +86,14 @@ private:
 	UFUNCTION()
 		void AnimNotify_DodgeAttackDisable();
 	UFUNCTION()
+		void AnimNotify_SprintAttackAble();
+	UFUNCTION()
+		void AnimNotify_SprintAttackDisable();
+	UFUNCTION()
+		void AnimNotify_HeavyAttackAble();
+	UFUNCTION()
+		void AnimNotify_HeavyAttackDisable();
+	UFUNCTION()
 		void AnimNotify_NextCombo();
 	UFUNCTION()
 		void AnimNotify_SprintAttackPossible();

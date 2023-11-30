@@ -253,7 +253,10 @@ void AMyCharacter::BeginPlay()
 	// 닷지 도중 공격을 감지했을 때 실행되는 델리게이트
 	MyAnim->OnDodgeAttackCheck.AddLambda([this]()-> void {
 		UI_Skill->MLDisable();
-		if (ActionState == "DodgeAttackPossible") MyAnim->JumpToDodgeAttack();
+		if (ActionState == "DodgeAttackPossible") {
+			ActionState = "DodgeAttack";
+			MyAnim->JumpToDodgeAttack();
+		}
 	});
 	// 헤비 어택 차지 정도를 감지했을 때 실행되는 델리게이트
 	// 차지 정도가 낮으면 1타만 실행하고 차지가 만족되면 2타 준비를 한다.
@@ -268,6 +271,7 @@ void AMyCharacter::BeginPlay()
 	});
 	// 헤비 공격 2타
 	MyAnim->OnChargeAttackCheck.AddLambda([this]()-> void {
+		IsAttackAble = false;
 		if (IsCharge == 2) {
 			MyAnim->JumpToHeavy2();
 		}

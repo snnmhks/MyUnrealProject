@@ -89,6 +89,22 @@ void UMyAnimInstance::AnimNotify_DodgeAttackDisable() {
 	OnAttackDisable.Broadcast();
 }
 
+void UMyAnimInstance::AnimNotify_SprintAttackAble() {
+	OnAttackAble.Broadcast();
+}
+
+void UMyAnimInstance::AnimNotify_SprintAttackDisable() {
+	OnAttackDisable.Broadcast();
+}
+
+void UMyAnimInstance::AnimNotify_HeavyAttackAble() {
+	OnAttackAble.Broadcast();
+}
+
+void UMyAnimInstance::AnimNotify_HeavyAttackDisable() {
+	OnAttackDisable.Broadcast();
+}
+
 // 몽타주 섹션 넘기기
 // Montage_JumpToSection(섹션 이름, 적용할 몽타주)
 void UMyAnimInstance::NextCombo(int _N, FString Name) {

@@ -14,6 +14,7 @@ AEnemyParent::AEnemyParent()
 	// 애니메이션 설정
 	GetMesh()->SetAnimationMode(EAnimationMode::AnimationBlueprint);
 	GetMesh()->SetGenerateOverlapEvents(true);
+	GetMesh()->SetCollisionProfileName("PhysicsMesh");
 	AIControllerClass = AEnemyAIController::StaticClass();
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 }

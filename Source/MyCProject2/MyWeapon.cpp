@@ -26,8 +26,10 @@ AMyWeapon::AMyWeapon()
 	HitCapsule->SetupAttachment(WeaponMesh);
 	HitCapsule->SetRelativeLocationAndRotation(FVector(0.0f, -90.0f, 0.0f), FRotator(0.0f, 0.0f, -90.0f));
 	HitCapsule->SetCapsuleHalfHeight(90.0f);
+	HitCapsule->SetCapsuleRadius(22.0f);
 	HitCapsule->SetCollisionProfileName("HittedCapsule");
 	HitCapsule->SetGenerateOverlapEvents(true);
+	HitCapsule->SetNotifyRigidBodyCollision(false);
 	HitCapsule->SetHiddenInGame(false);
 
 }
