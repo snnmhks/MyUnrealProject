@@ -18,6 +18,7 @@
 #include "Math/UnrealMathUtility.h" // 언리얼에서 제공하는 수학 함수들
 #include "Engine/DataTable.h" // 데이터 테이블 사용
 #include "Components/ProgressBar.h" // ProgressBar 사용
+#include "EnemyParent.h"
 
 // Sets default values
 AMyCharacter::AMyCharacter()
@@ -283,6 +284,7 @@ void AMyCharacter::BeginPlay()
 			IsAttackAble = false;
 			UE_LOG(LogTemp, Log, TEXT("Hit"));
 			// 여기에 타격 후 무엇을 할 지 작성
+			TargetEnemy->OnDamaged(50);
 		}
 		else {
 			IsAttackAble = true;

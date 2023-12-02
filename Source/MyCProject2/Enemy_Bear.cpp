@@ -19,11 +19,22 @@ AEnemy_Bear::AEnemy_Bear() {
 		TEXT("AnimBlueprint'/Game/InfinityBladeAdversaries/Enemy/Enemy_Bear/ABP/ABP_Bear'"));
 	if (ENEMY_ANIM.Succeeded()) GetMesh()->SetAnimInstanceClass(ENEMY_ANIM.Class);
 
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> BEAR_DIE_MONTAGE(
+		TEXT("AnimMontage'/Game/InfinityBladeAdversaries/Enemy/Enemy_Bear/Montage/Die'"));
+	if (BEAR_DIE_MONTAGE.Succeeded()) DieMongtage = BEAR_DIE_MONTAGE.Object;
+
 	AIControllerClass = AEnemyAIController::StaticClass();
+}
+
+void AEnemy_Bear::PostInitializeComponents() {
+	Super::PostInitializeComponents();
+
+	EnemyAnim = Cast<UEnemyAnimInstance>(GetMesh()->GetAnimInstance());
 }
 
 void AEnemy_Bear::BeginPlay() {
 	Super::BeginPlay();
 
-	EnemyAnim = Cast<UEnemyAnimInstance>(GetMesh()->GetAnimInstance());
+	EnemyCurrentHP = 100;
+	EnemyMaxHP = 100;
 }

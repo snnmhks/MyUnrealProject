@@ -11,12 +11,30 @@ class MYCPROJECT2_API AEnemyParent : public ACharacter
 {
 	GENERATED_BODY()
 private:
+	// UI를 받아오는 변수
+	TSubclassOf<class UUserWidget> UI_EnemyClass;
+
+	UPROPERTY(VisibleAnywhere)
+		class UWidgetComponent* EWidget;
+	// 체력바 뒤쪽까지 보여주기
+	UPROPERTY(VisibleAnywhere)
+		class UWidgetComponent* EWidget2;
 
 public:
 
 	// 캐릭터에 적용할 애니메이션
 	UPROPERTY(VisibleAnywhere)
 		class UEnemyAnimInstance* EnemyAnim;
+
+	// 적의 상태 정보
+	UPROPERTY(VisibleAnywhere)
+		float EnemyMaxHP;
+	UPROPERTY(VisibleAnywhere)
+		float EnemyCurrentHP;
+
+	// 죽는 몽타주
+	UPROPERTY(VisibleAnywhere)
+		class UAnimMontage* DieMongtage;
 
 public:
 	// Sets default values for this pawn's properties
@@ -33,4 +51,5 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	void OnDamaged(float _Damage);
 };

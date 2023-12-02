@@ -95,6 +95,9 @@ public:
 	// 타격이 가능한 시점인가?
 	UPROPERTY(VisibleAnywhere)
 		bool IsAttackAble = false;
+	// 타격 당한 적
+	UPROPERTY(VisibleAnywhere)
+		class AEnemyParent* TargetEnemy;
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly)
 		FString ActionState;

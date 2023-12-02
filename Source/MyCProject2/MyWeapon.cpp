@@ -51,14 +51,15 @@ void AMyWeapon::Tick(float DeltaTime)
 void AMyWeapon::OnHit(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) {
 	AEnemyParent* Enemy = Cast<AEnemyParent> (OtherActor);
 	if (Enemy && WeoponOwner) {
-		UE_LOG(LogTemp, Log, TEXT("Overlap"));
 		if (WeoponOwner->IsAttackAble) {
 			WeoponOwner->IsAttackAble = false;
 			UE_LOG(LogTemp, Log, TEXT("Hit"));
 			// 타격 후 뭘 할 지 작성
+			Enemy->OnDamaged(50);
 		}
 		else {
 			WeoponOwner->IsAttackAble = true;
+			WeoponOwner->TargetEnemy = Enemy;
 		}
 	}
 }
