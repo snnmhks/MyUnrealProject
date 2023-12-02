@@ -13,3 +13,9 @@ IsAttackPossible이 true인 상태로 겹침 이벤트가 발생했다면 타격
 이미 겹쳐 있는 상태에서 공격을 할 수도 있기 때문에 공격이 아닌 상태에서 겹침이 발생한다면 IsAttackPossible을 true로 설정하고 타격 판정 시작 ainm notify를 true인 채로 지나면 타격 판정이 일어나도록 합니다.
 IsAttackPossible이 계속 true가 되면 안되므로 OnComponentEndOverlap을 통해 겹침이 끝나면 IsAttackPossible을 false로 설정합니다.
 다음엔 판정 후 무엇을 할 것인지 만들겠습니다.
+
+2023-12-03
+타격 후 적의 생명에 관한 정보를 최신화해야 하므로 적 인스턴스에 HP변수와 Progress bar를 만들어주었습니다.
+OnDamaged라는 함수를 만들어서 데미지 float값을 매개변수로 HP값을 바꾸어주고 바뀐 값으로 Progress bar Percent를 설정하였습니다.
+타격 후 적의 HP bar가 깎이는 것을 확인하였고 HP가 0이되면  Die몽타주를 재생하고 Die몽타주 끝에 AnimNotify를 추가하여 죽은 후 엑터가 사라질 수 있게 하였습니다.
+다음엔 각각의 타격에 대한 데미지 값을 설정하고 그것이 OnDamaged에 반영되게 하겠습니다.
