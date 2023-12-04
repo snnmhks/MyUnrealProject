@@ -53,9 +53,9 @@ void AMyWeapon::OnHit(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, U
 	if (Enemy && WeoponOwner) {
 		if (WeoponOwner->IsAttackAble) {
 			WeoponOwner->IsAttackAble = false;
-			UE_LOG(LogTemp, Log, TEXT("Hit"));
+			UE_LOG(LogTemp, Log, TEXT("%f"), WeoponOwner->DamageValue);
 			// 타격 후 뭘 할 지 작성
-			Enemy->OnDamaged(50);
+			Enemy->OnDamaged(WeoponOwner->DamageValue);
 		}
 		else {
 			WeoponOwner->IsAttackAble = true;

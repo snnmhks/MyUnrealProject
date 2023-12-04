@@ -30,4 +30,22 @@ struct FSkillDataStruct : public  FTableRowBase
 		float MRCompleteChargeValue;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		float MRMaxChargeValue;
+
+	// 스킬 데미지 변수
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		float QSkillDamage;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		float CSkillDamage;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		float MRSkillDamage;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		float MRSkillDamage2;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		float LSkillDamage;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		float LSkillDamage2;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		float LSkillDamage3;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		float LSkillDamage4;
 };

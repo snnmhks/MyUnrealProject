@@ -98,6 +98,9 @@ public:
 	// 타격 당한 적
 	UPROPERTY(VisibleAnywhere)
 		class AEnemyParent* TargetEnemy;
+	// 전달할 데미지 값
+	UPROPERTY(VisibleAnywhere)
+		float DamageValue;
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly)
 		FString ActionState;

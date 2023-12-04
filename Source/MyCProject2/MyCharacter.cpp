@@ -47,7 +47,8 @@ AMyCharacter::AMyCharacter()
 	ChargeValue = 0;									// 헤비 공격의 차지 정도를 표현하는 수치
 	IsCharge = 0;										// 차지가 만족할 만큼 됐는지를 판단하여 다음 헤비 공격을 판단한다.
 	SkillCoolRate = 0.01f;								// 스킬 쿨타임 돌리는 함수를 몇초마다 한번씩 실행을 할 것인가
-	// 
+	DamageValue = 0.0f;
+														// 
 	// 카메라 변수
 	CameraZoomMin = 150.f;								// 휠업다운을 통한 줌인아웃의 최소 및 최대 길이
 	CameraZoomMax = 800.f;
@@ -174,6 +175,15 @@ void AMyCharacter::SetSkillValue() {
 	SkillData.Add("CSkillCoolTime", tmp->CSkillCoolTime);
 	SkillData.Add("MRSkillCoolTime", tmp->MRSkillCoolTime);
 
+	SkillData.Add("QSkillDamage", tmp->QSkillDamage);
+	SkillData.Add("CSkillDamage", tmp->CSkillDamage);
+	SkillData.Add("MRSkillDamage", tmp->MRSkillDamage);
+	SkillData.Add("MRSkillDamage2", tmp->MRSkillDamage2);
+	SkillData.Add("LSkillDamage", tmp->LSkillDamage);
+	SkillData.Add("LSkillDamage2", tmp->LSkillDamage2);
+	SkillData.Add("LSkillDamage3", tmp->LSkillDamage3);
+	SkillData.Add("LSkillDamage4", tmp->LSkillDamage4);
+
 	SkillData.Add("QMaxRunTime", tmp->QMaxRunTime);
 	SkillData.Add("MRCompleteChargeValue", tmp->MRCompleteChargeValue);
 	SkillData.Add("MRMaxChargeValue", tmp->MRMaxChargeValue);
@@ -240,10 +250,22 @@ void AMyCharacter::BeginPlay()
 	MyAnim->OnMontageEnded.AddDynamic(this, &AMyCharacter::AttackEnded);
 	// 콤보를 감지 했을 때 실행되는 델리게이트
 	MyAnim->OnNextComboCheck.AddLambda([this]()-> void {
+		IsAttackAble = false;
 		if (IsCombo) {
 			IsCombo = 0;
 			ComboNum++;
 			MyAnim->NextCombo(ComboNum, "Combo");
+			switch (ComboNum) {
+			case 2:
+				DamageValue = SkillData.FindRef("LSkillDamage2");
+				break;
+			case 3:
+				DamageValue = SkillData.FindRef("LSkillDamage3");
+				break;
+			case 4:
+				DamageValue = SkillData.FindRef("LSkillDamage4");
+				break;
+			}
 		}
 	});
 	// 스프린트 도중 공격을 감지했을 때 실행되는 델리게이트
@@ -282,9 +304,9 @@ void AMyCharacter::BeginPlay()
 	MyAnim->OnAttackAble.AddLambda([this]()->void {
 		if (IsAttackAble) {
 			IsAttackAble = false;
-			UE_LOG(LogTemp, Log, TEXT("Hit"));
+			UE_LOG(LogTemp, Log, TEXT("%f"),DamageValue);
 			// 여기에 타격 후 무엇을 할 지 작성
-			TargetEnemy->OnDamaged(50);
+			if (IsValid(TargetEnemy)) TargetEnemy->OnDamaged(DamageValue);
 		}
 		else {
 			IsAttackAble = true;
@@ -456,8 +478,10 @@ void AMyCharacter::ComboAttack(const FInputActionValue& Value) {
 	if (ActionState == "Idle") {
 		ActionState = "Combo";
 		MyAnim->PlayMongtage("Combo");
+		DamageValue = SkillData.FindRef("LSkillDamage");
 	}
 	else if (ActionState == "SprintAttackPossible") {
+		DamageValue = SkillData.FindRef("QSkillDamage");
 		QSkillRunValue = 0.f;
 		UI_Skill->MLDisable();
 		UI_Skill->ChargeBarDisable();
@@ -467,6 +491,7 @@ void AMyCharacter::ComboAttack(const FInputActionValue& Value) {
 		TargetPosition = GetActorLocation() + GetCapsuleComponent()->GetForwardVector() * 500;
 	}
 	else if (ActionState == "Dodge") {
+		DamageValue = SkillData.FindRef("CSkillDamage");
 		ActionState = "DodgeAttackPossible";
 	}
 	else {
@@ -503,6 +528,7 @@ void AMyCharacter::Dodge(const FInputActionValue& Value) {
 // 강한 공격, 차지를 통해 더 강하게 때릴수 있다.
 void AMyCharacter::HeavyAttack(const FInputActionValue& Value) {
 	if (ActionState == "Idle" && MRSkillCoolValue == 0 && CurrentMP >= SkillData.FindRef("MRMP")) {
+		DamageValue = SkillData.FindRef("MRSkillDamage");
 		DiffMP(-SkillData.FindRef("MRMP"));
 		UI_Skill->ChargeBarActivate("MR");
 		UI_Skill->IconSizeDown("MR");
@@ -591,6 +617,7 @@ void AMyCharacter::MRSkillChargeTime() {
 	float MaxChargeValue = SkillData.FindRef("MRMaxChargeValue");
 	UI_Skill->ChargeBar->SetPercent(ChargeValue / CompleteChageTime);
 	if (ChargeValue >= CompleteChageTime && ChargeValue < MaxChargeValue) {
+		DamageValue = SkillData.FindRef("MRSkillDamage2");
 		IsCharge = 2;
 	}
 	else if (ChargeValue >= MaxChargeValue) {

@@ -116,6 +116,8 @@ void UMyAnimInstance::NextCombo(int _N, FString Name) {
 	case 3:
 		Montage_JumpToSection("Combo3", ComboMontage);
 		break;
+	default:
+		break;
 	}
 }
 
