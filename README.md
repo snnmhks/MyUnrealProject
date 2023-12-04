@@ -19,3 +19,6 @@ IsAttackPossible이 계속 true가 되면 안되므로 OnComponentEndOverlap을 
 OnDamaged라는 함수를 만들어서 데미지 float값을 매개변수로 HP값을 바꾸어주고 바뀐 값으로 Progress bar Percent를 설정하였습니다.
 타격 후 적의 HP bar가 깎이는 것을 확인하였고 HP가 0이되면  Die몽타주를 재생하고 Die몽타주 끝에 AnimNotify를 추가하여 죽은 후 엑터가 사라질 수 있게 하였습니다.
 다음엔 각각의 타격에 대한 데미지 값을 설정하고 그것이 OnDamaged에 반영되게 하겠습니다.
+
+2023-12-05
+데이터 테이블로 각 공격에 대한 데미지를 정해주었고 타격 판정에서 그 데미지가 반영 되도록 하였습니다.
