@@ -105,7 +105,7 @@ AMyCharacter::AMyCharacter()
 	// 무기 생성
 	static ConstructorHelpers::FClassFinder<AMyWeapon> MY_WEAPON(
 		TEXT("Class'/Script/MyCProject2.MyWeapon'"));
-	if (MY_WEAPON.Succeeded()) Halberd = MY_WEAPON.Class;
+	if (MY_WEAPON.Succeeded()) WeaponCalss = MY_WEAPON.Class;
 
 	// 애니메이션 설정
 	GetMesh()->SetAnimationMode(EAnimationMode::AnimationBlueprint);
@@ -228,10 +228,10 @@ void AMyCharacter::BeginPlay()
 	}
 
 	// 무기 매쉬 생성 
-	AMyWeapon* SpawnWeapon = GetWorld()->SpawnActor<AMyWeapon>(Halberd);
-	if (SpawnWeapon) {
-		GetMesh()->GetSocketByName("hand_rSocket")->AttachActor(SpawnWeapon, GetMesh());
-		SpawnWeapon->WeoponOwner = this;
+	Weapon = GetWorld()->SpawnActor<AMyWeapon>(WeaponCalss);
+	if (Weapon) {
+		GetMesh()->GetSocketByName("hand_rSocket")->AttachActor(Weapon, GetMesh());
+		Weapon->WeoponOwner = this;
 	}
 	//else UE_LOG(LogTemp, Log, TEXT("Hello"));
 
@@ -304,9 +304,9 @@ void AMyCharacter::BeginPlay()
 	MyAnim->OnAttackAble.AddLambda([this]()->void {
 		if (IsAttackAble) {
 			IsAttackAble = false;
-			UE_LOG(LogTemp, Log, TEXT("%f"),DamageValue);
-			// 여기에 타격 후 무엇을 할 지 작성
-			if (IsValid(TargetEnemy)) TargetEnemy->OnDamaged(DamageValue);
+			if (IsValid(TargetEnemy)) {
+				Weapon->HitFunction(TargetEnemy);
+			}
 		}
 		else {
 			IsAttackAble = true;

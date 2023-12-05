@@ -7,6 +7,8 @@
 #include "Components/PrimitiveComponent.h" 
 #include "MyCharacter.h"
 #include "EnemyParent.h"
+#include "Particles/ParticleSystem.h" // 이펙트를 사용하기 위해
+#include "Kismet/GameplayStatics.h" // spawn emitter를 사용하기 위해
 
 // Sets default values
 AMyWeapon::AMyWeapon()
@@ -14,12 +16,16 @@ AMyWeapon::AMyWeapon()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	// 캐릭터 매쉬 생성
+	// 무기 매쉬 생성
 	WeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SkeletalMesh"));
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> WEAPON_MESH(
 		TEXT("SkeletalMesh'/Game/ARPG_Pack/ARPG_Halberd/Demo/Weapon/Mesh/Halberd_Mesh.Halberd_Mesh'"));
 	if (WEAPON_MESH.Succeeded()) WeaponMesh->SetSkeletalMesh(WEAPON_MESH.Object);
 	RootComponent = WeaponMesh;
+
+	static ConstructorHelpers::FObjectFinder<UParticleSystem> HIT_EFFECT_MESH(
+		TEXT("ParticleSystem'/Game/InfinityBladeEffects/Effects/FX_Mobile/Impacts/P_Impact_Enemy_Fire'"));
+	if (HIT_EFFECT_MESH.Succeeded()) HitEffect = HIT_EFFECT_MESH.Object;
 
 	// Component 생성
 	HitCapsule = CreateDefaultSubobject<UCapsuleComponent>(TEXT("HitCapsule"));
@@ -30,7 +36,6 @@ AMyWeapon::AMyWeapon()
 	HitCapsule->SetCollisionProfileName("HittedCapsule");
 	HitCapsule->SetGenerateOverlapEvents(true);
 	HitCapsule->SetNotifyRigidBodyCollision(false);
-	HitCapsule->SetHiddenInGame(false);
 
 }
 
@@ -48,14 +53,17 @@ void AMyWeapon::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
+void AMyWeapon::HitFunction(AEnemyParent* _Enemy) {
+	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitEffect, HitCapsule->GetComponentLocation() + FVector(0.0f, 0.0f, 70.0f));
+	WeoponOwner->IsAttackAble = false;
+	_Enemy->OnDamaged(WeoponOwner->DamageValue);
+}
+
 void AMyWeapon::OnHit(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) {
 	AEnemyParent* Enemy = Cast<AEnemyParent> (OtherActor);
 	if (Enemy && WeoponOwner) {
 		if (WeoponOwner->IsAttackAble) {
-			WeoponOwner->IsAttackAble = false;
-			UE_LOG(LogTemp, Log, TEXT("%f"), WeoponOwner->DamageValue);
-			// 타격 후 뭘 할 지 작성
-			Enemy->OnDamaged(WeoponOwner->DamageValue);
+			HitFunction(Enemy);
 		}
 		else {
 			WeoponOwner->IsAttackAble = true;

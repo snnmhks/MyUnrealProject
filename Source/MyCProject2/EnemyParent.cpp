@@ -5,6 +5,7 @@
 #include "EnemyAnimInstance.h"
 #include "EnemyAIController.h"
 #include "EnemyWidget.h"
+#include "MyWeapon.h"
 #include "Components/WidgetComponent.h"
 
 // Sets default values
@@ -16,6 +17,7 @@ AEnemyParent::AEnemyParent()
 	// 애니메이션 설정
 	GetMesh()->SetAnimationMode(EAnimationMode::AnimationBlueprint);
 	GetMesh()->SetGenerateOverlapEvents(true);
+	GetMesh()->SetNotifyRigidBodyCollision(false);
 	GetMesh()->SetCollisionProfileName("PhysicsMesh");
 	AIControllerClass = AEnemyAIController::StaticClass();
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
@@ -42,12 +44,15 @@ void AEnemyParent::BeginPlay()
 {
 	Super::BeginPlay();
 
+	IsDying = false;
+
 	EWidget->SetCollisionProfileName("NoCollision");
 	EWidget2->SetCollisionProfileName("NoCollision");
 	EWidget2->SetRelativeRotation(FRotator(0.0f, 180.0f, 0.0f));
 
 	if (EnemyAnim) {
 		EnemyAnim->DieCheck.AddLambda([this]()-> void {
+			IsDying = false;
 			Destroy();
 		});
 	}
@@ -69,14 +74,15 @@ void AEnemyParent::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 }
 
 void AEnemyParent::OnDamaged(float _Damage) {
+	if (IsDying) return;
 	EnemyCurrentHP -= _Damage;
 	if (EnemyCurrentHP <= 0) {
+		IsDying = true;
 		EnemyCurrentHP = 0;
 		if (DieMongtage && EnemyAnim) {
 			EnemyAnim->Montage_Play(DieMongtage, 1.0f);
 		}
 	}
-	
 	Cast<UEnemyWidget>(EWidget->GetWidget())->SetHPBarPercent(EnemyCurrentHP, EnemyMaxHP);
 	Cast<UEnemyWidget>(EWidget2->GetWidget())->SetHPBarPercent(EnemyCurrentHP, EnemyMaxHP);
 }

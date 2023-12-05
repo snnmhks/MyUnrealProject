@@ -19,6 +19,11 @@ private:
 	// 체력바 뒤쪽까지 보여주기
 	UPROPERTY(VisibleAnywhere)
 		class UWidgetComponent* EWidget2;
+	// 죽는 모션 중인가
+	UPROPERTY(VisibleAnywhere)
+		bool IsDying;
+
+private:
 
 public:
 

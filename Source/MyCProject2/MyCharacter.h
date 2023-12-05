@@ -158,8 +158,10 @@ private:
 		class UInputAction* IA_HeavyAttack;
 
 	// Weapon 변수 설정
-	UPROPERTY(VisibleAnywhere, Category = Input)
-		TSubclassOf<class AMyWeapon> Halberd;
+	UPROPERTY(VisibleAnywhere, Category = Weapon)
+		TSubclassOf<class AMyWeapon> WeaponCalss;
+	UPROPERTY(VisibleAnywhere, Category = Weapon)
+		class AMyWeapon* Weapon;
 
 protected:
 	// 데이터 테이블에서 가져온 변수를 저장하는 함수
