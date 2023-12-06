@@ -9,6 +9,9 @@
 /**
  * 
  */
+
+// 레벨 블루프린트를 c++로 가져온것
+
 UCLASS()
 class MYCPROJECT2_API AMyLevelScript : public ALevelScriptActor
 {

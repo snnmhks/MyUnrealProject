@@ -284,6 +284,7 @@ void AMyCharacter::BeginPlay()
 	// 헤비 어택 차지 정도를 감지했을 때 실행되는 델리게이트
 	// 차지 정도가 낮으면 1타만 실행하고 차지가 만족되면 2타 준비를 한다.
 	MyAnim->OnNoChargeAttackCheck.AddLambda([this]()-> void {
+		Weapon->PlayEffect("Charge1");
 		if (ActionState == "HeavyCharging") {
 			if (IsCharge == 0) IsCharge = 1;
 			else if (IsCharge == 1) {
@@ -314,6 +315,10 @@ void AMyCharacter::BeginPlay()
 	});
 	MyAnim->OnAttackDisable.AddLambda([this]()->void {
 		IsAttackAble = false;
+	});
+
+	MyAnim->OnPlayEffect.AddLambda([this]()->void {
+		Weapon->PlayEffect("Charge2");
 	});
 }
 

@@ -33,6 +33,9 @@ public:
 	FOnCheckDelegate OnAttackAble;
 	FOnCheckDelegate OnAttackDisable;
 
+	// 이펙트를 소환하는 타이밍
+	FOnCheckDelegate OnPlayEffect;
+
 	// 점프 몽타주
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = Action, Meta = (AllowPrivateAccess = true))
 		UAnimMontage* JumpMontage;
@@ -56,8 +59,10 @@ public:
 	// 몽타주 재생 함수
 	UFUNCTION()
 		void PlayMongtage(FString Name);
+	// 몽타주 멈추는 함수
 	UFUNCTION()
 		void StopMontage(FString Name);
+	// 몽타주 섹션을 넘기는 함수들
 	UFUNCTION()
 		void NextCombo(int _N, FString Name);
 	UFUNCTION()
@@ -103,5 +108,6 @@ private:
 		void AnimNotify_NoChargeCheck();
 	UFUNCTION()
 		void AnimNotify_ChargeCheck();
-
+	UFUNCTION()
+		void AnimNotify_PlayEffect();
 };

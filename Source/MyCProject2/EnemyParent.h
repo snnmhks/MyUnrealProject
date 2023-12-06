@@ -41,6 +41,10 @@ public:
 	UPROPERTY(VisibleAnywhere)
 		class UAnimMontage* DieMongtage;
 
+	// 소환 몽타주
+	UPROPERTY(VisibleAnywhere)
+		UAnimMontage* SpawnMontage;
+
 public:
 	// Sets default values for this pawn's properties
 	AEnemyParent();
@@ -56,5 +60,6 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	// 데미지를 받으면 호출할 함수
 	void OnDamaged(float _Damage);
 };

@@ -10,6 +10,9 @@
  *
  */
 
+// USTRUCT로 만들고 엔진 내 DataTable을 사용해야하니 블루프린트 타입까지 써놔야한다.
+// FTableRowBase를 상속받아 DataTable을 사용할 수 있게 한다.
+
 USTRUCT(BlueprintType)
 struct FCharacterStateStruct : public  FTableRowBase
 {

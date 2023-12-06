@@ -20,6 +20,12 @@ private:
 	// 타격시 이펙트
 	UPROPERTY(VisibleAnywhere)
 		class UParticleSystem* HitEffect;
+	// 차징 이펙트
+	UPROPERTY(VisibleAnywhere)
+		class UParticleSystem* ChargeEffect;
+	// 차징 이펙트2
+	UPROPERTY(VisibleAnywhere)
+		class UParticleSystem* ChargeEffect2;
 
 public:
 	// 무기를 들고 있는 캐릭터
@@ -45,4 +51,6 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	void HitFunction(class AEnemyParent* _Enemy);
+
+	void PlayEffect(FName _Name);
 };

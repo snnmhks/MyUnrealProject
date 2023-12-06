@@ -24,11 +24,13 @@ void AEnemyAIController::BeginPlay() {
 
 
 void AEnemyAIController::RunBT() {
+	// 정확한 작동 원리를 아직 모름
 	UBlackboardComponent* BlackboardComp = Blackboard.Get();
 	if (UseBlackboard(BBAsset, BlackboardComp)) RunBehaviorTree(BTAsset);
 }
 
 void AEnemyAIController::StopBT() {
+	// 지금 현재 작동중안 BT를 가져와서 있으면 멈춘다.
 	UBehaviorTreeComponent* BehaviorTreeComponent = Cast<UBehaviorTreeComponent>(BrainComponent);
 	if (nullptr == BehaviorTreeComponent) return;
 

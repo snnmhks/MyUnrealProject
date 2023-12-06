@@ -23,6 +23,11 @@ AEnemy_Bear::AEnemy_Bear() {
 		TEXT("AnimMontage'/Game/InfinityBladeAdversaries/Enemy/Enemy_Bear/Montage/Die'"));
 	if (BEAR_DIE_MONTAGE.Succeeded()) DieMongtage = BEAR_DIE_MONTAGE.Object;
 
+	// 家券 根鸥林 积己
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> SPAWN_MONTAGE(
+		TEXT("AnimMontage'/Game/InfinityBladeAdversaries/Enemy/Enemy_Bear/Montage/Spawn.Spawn'"));
+	if (SPAWN_MONTAGE.Succeeded()) SpawnMontage = SPAWN_MONTAGE.Object;
+
 	AIControllerClass = AEnemyAIController::StaticClass();
 }
 

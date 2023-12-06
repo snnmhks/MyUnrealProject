@@ -33,7 +33,7 @@ UMyAnimInstance::UMyAnimInstance() {
 void UMyAnimInstance::NativeBeginPlay()
 {
 	Super::NativeBeginPlay();
-
+	// 이건 왜 만들었었지
 	Player = Cast<AMyCharacter>(TryGetPawnOwner());
 }
 
@@ -103,6 +103,10 @@ void UMyAnimInstance::AnimNotify_HeavyAttackAble() {
 
 void UMyAnimInstance::AnimNotify_HeavyAttackDisable() {
 	OnAttackDisable.Broadcast();
+}
+
+void UMyAnimInstance::AnimNotify_PlayEffect() {
+	OnPlayEffect.Broadcast();
 }
 
 // 몽타주 섹션 넘기기

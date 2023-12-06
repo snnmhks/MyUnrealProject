@@ -40,6 +40,7 @@ private:
 	UPROPERTY(VisibleAnywhere)
 		float CameraRotateScale;
 	// 스킬쿨 함수들이 몇초마다 1번씩 돌아가게 할 건지 정하는 변수
+	// 숫자가 높을수록 더 자주 호출하여 자연스러운 쿨타임을 연출하나 너무 많이 호출하면 성능이 떨어진다.
 	UPROPERTY(VisibleAnywhere)
 		float SkillCoolRate;
 
@@ -101,7 +102,7 @@ public:
 	// 전달할 데미지 값
 	UPROPERTY(VisibleAnywhere)
 		float DamageValue;
-
+	// 이 스트링 값으로 현재 캐릭터의 상태를 나타내고 여러 상태가 겹쳐서 발생하지 않도록 한다.
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly)
 		FString ActionState;
 
@@ -207,10 +208,10 @@ protected:
 	// MP 조절 함수
 	UFUNCTION()
 		void DiffMP(float _MP);
-	// HP 자연 회복 함수
+	// HP 자연 회복 함수. timer를 사용하여 HP 조절함수를 지속적으로 호출한다.
 	UFUNCTION()
 		void NaturalRecoverHP();
-	// MP 자연 회복 함수
+	// MP 자연 회복 함수. timer를 사용하여 MP 조절함수를 지속적으로 호출한다.
 	UFUNCTION()
 		void NaturalRecoverMP();
 };
