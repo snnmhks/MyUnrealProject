@@ -23,6 +23,10 @@ AMyWeapon::AMyWeapon()
 	if (WEAPON_MESH.Succeeded()) WeaponMesh->SetSkeletalMesh(WEAPON_MESH.Object);
 	RootComponent = WeaponMesh;
 
+	EmitterPoint = CreateDefaultSubobject<USceneComponent>(TEXT("EmitterPoint"));
+	EmitterPoint->SetRelativeLocation(FVector(0.0f, -120.0f, 0.0f));
+	EmitterPoint->SetupAttachment(WeaponMesh);
+
 	// 타격 이펙트 생성
 	static ConstructorHelpers::FObjectFinder<UParticleSystem> HIT_EFFECT_MESH(
 		TEXT("ParticleSystem'/Game/InfinityBladeEffects/Effects/FX_Mobile/Impacts/P_Impact_Enemy_Base'"));
@@ -35,7 +39,7 @@ AMyWeapon::AMyWeapon()
 
 	// 차지 이펙트2 생성
 	static ConstructorHelpers::FObjectFinder<UParticleSystem> CHARGE_EFFECT2_MESH(
-		TEXT("ParticleSystem'/Game/InfinityBladeEffects/Effects/FX_Mobile/ICE/combat/P_Circle_ChargeUp_Phase2'"));
+		TEXT("ParticleSystem'/Game/InfinityBladeEffects/Effects/FX_Skill_Leap/P_Skill_Leap_Base_Charge_Weapon'"));
 	if (CHARGE_EFFECT2_MESH.Succeeded()) ChargeEffect2 = CHARGE_EFFECT2_MESH.Object;
 
 	// Component 생성
@@ -65,17 +69,17 @@ void AMyWeapon::Tick(float DeltaTime)
 }
 
 void AMyWeapon::HitFunction(AEnemyParent* _Enemy) {
-	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitEffect, HitCapsule->GetComponentLocation() + FVector(0.0f, 0.0f, 70.0f));
+	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitEffect, EmitterPoint->GetComponentLocation() + FVector(0.0f, 0.0f, 70.0f));
 	WeoponOwner->IsAttackAble = false;
 	_Enemy->OnDamaged(WeoponOwner->DamageValue);
 }
 
 void AMyWeapon::PlayEffect(FName _Name) {
 	if (_Name == "Charge1") {
-		UGameplayStatics::SpawnEmitterAttached(ChargeEffect2, RootComponent, EName::None, FVector(0.0f, -140.0f, 0.0f));
+		UGameplayStatics::SpawnEmitterAttached(ChargeEffect2, EmitterPoint, EName::None, FVector(0.0f), FRotator::ZeroRotator, FVector(1.5f));
 	}
 	else if (_Name == "Charge2") {
-		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitEffect, HitCapsule->GetComponentLocation() + FVector(0.0f, 0.0f, 70.0f), FRotator::ZeroRotator, FVector(2.f));
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitEffect, EmitterPoint->GetComponentLocation(), FRotator::ZeroRotator, FVector(3.f));
 	}
 
 }

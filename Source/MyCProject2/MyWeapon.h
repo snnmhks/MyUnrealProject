@@ -17,6 +17,9 @@ private:
 	// 타격 판정용 캡슐
 	UPROPERTY(VisibleAnywhere)
 		class UCapsuleComponent* HitCapsule;
+	// 이펙트가 나오는 위치를 선정하기 위한 변수
+	UPROPERTY(VisibleAnywhere)
+		class USceneComponent* EmitterPoint;
 	// 타격시 이펙트
 	UPROPERTY(VisibleAnywhere)
 		class UParticleSystem* HitEffect;
