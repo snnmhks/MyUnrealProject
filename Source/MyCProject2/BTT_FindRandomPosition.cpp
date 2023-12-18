@@ -5,9 +5,11 @@
 #include "EnemyAIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "NavigationSystem.h"
+#include "GameFramework/Controller.h"
+#include "EnemyParent.h"
 
 UBTT_FindRandomPosition::UBTT_FindRandomPosition() {
-	NodeName = TEXT("FindRandomPosition");
+	NodeName = TEXT("FindPlayerPosition");
 }
 
 EBTNodeResult::Type UBTT_FindRandomPosition::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) {
@@ -18,6 +20,16 @@ EBTNodeResult::Type UBTT_FindRandomPosition::ExecuteTask(UBehaviorTreeComponent&
 	UNavigationSystemV1* NavSystem = UNavigationSystemV1::GetNavigationSystem(ControllingPawn->GetWorld());
 	if (nullptr == NavSystem) return EBTNodeResult::Failed;
 
+	APawn* TargetPlayer = Cast<AEnemyParent>(ControllingPawn)->TargetPlayer;
+	if (TargetPlayer) {
+		OwnerComp.GetBlackboardComponent()->SetValueAsVector(AEnemyAIController::KeyTargetPosition, TargetPlayer->GetActorLocation());
+		return EBTNodeResult::Succeeded;
+	}
+
+	/*
+	UNavigationSystemV1* NavSystem = UNavigationSystemV1::GetNavigationSystem(ControllingPawn->GetWorld());
+	if (NavSystem) return EBTNodeResult::Failed;
+
 	FVector Orgin = ControllingPawn->GetActorLocation();
 	FNavLocation NextPatrol;
 	if (NavSystem->GetRandomPointInNavigableRadius(Orgin, 500.0f, NextPatrol))
@@ -25,6 +37,7 @@ EBTNodeResult::Type UBTT_FindRandomPosition::ExecuteTask(UBehaviorTreeComponent&
 		OwnerComp.GetBlackboardComponent()->SetValueAsVector(AEnemyAIController::KeyRandomPosition, NextPatrol.Location);
 		return EBTNodeResult::Succeeded;
 	}
+	*/
 
 	return EBTNodeResult::Failed;
 }

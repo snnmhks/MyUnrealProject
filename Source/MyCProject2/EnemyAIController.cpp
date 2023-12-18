@@ -8,6 +8,7 @@
 // 블랙보드에서 키 가져옴
 const FName AEnemyAIController::KeyRandomPosition(TEXT("RandomPosition"));
 const FName AEnemyAIController::KeyTargetPosition(TEXT("TargetPosition"));
+const FName AEnemyAIController::KeyMongtageTime(TEXT("MongtageTime"));
 
 AEnemyAIController::AEnemyAIController() {
 	static ConstructorHelpers::FObjectFinder<UBlackboardData> BLACK_BOARD(TEXT("BlackboardData'/Game/AI/BB_Enemy'"));
@@ -40,5 +41,5 @@ void AEnemyAIController::StopBT() {
 void AEnemyAIController::OnPossess(APawn* InPawn) {
 	Super::OnPossess(InPawn);
 
-	RunBT();
+	//RunBT();
 }

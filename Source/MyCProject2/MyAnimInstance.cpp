@@ -37,13 +37,13 @@ void UMyAnimInstance::NativeBeginPlay()
 	Player = Cast<AMyCharacter>(TryGetPawnOwner());
 }
 
-void UMyAnimInstance::PlayMongtage(FString Name) {
+void UMyAnimInstance::PlayMongtage(FString Name, float PlaySpeed) {
 	// 몽타주 재생 함수, 캐릭터 클래스에서는 PlayAnimMongtage 함수를 쓴다.
-	if (Name == "Combo") Montage_Play(ComboMontage, 1.0f);
-	else if (Name == "Sprint") Montage_Play(SprintMontage, 1.0f);
-	else if (Name == "Dodge") Montage_Play(DodgeMontage, 1.0f);
-	else if (Name == "Jump") Montage_Play(JumpMontage, 1.0f);
-	else if (Name == "Heavy") Montage_Play(HeavyMontage, 1.0f);
+	if (Name == "Combo") Montage_Play(ComboMontage, PlaySpeed);
+	else if (Name == "Sprint") Montage_Play(SprintMontage, PlaySpeed);
+	else if (Name == "Dodge") Montage_Play(DodgeMontage, PlaySpeed);
+	else if (Name == "Jump") Montage_Play(JumpMontage, PlaySpeed);
+	else if (Name == "Heavy") Montage_Play(HeavyMontage, PlaySpeed);
 }
 
 void UMyAnimInstance::StopMontage(FString Name) {

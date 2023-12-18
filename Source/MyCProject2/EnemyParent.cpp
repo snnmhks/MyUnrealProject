@@ -7,6 +7,7 @@
 #include "EnemyWidget.h"
 #include "MyWeapon.h"
 #include "Components/WidgetComponent.h"
+#include "Kismet/GameplayStatics.h" // GetPlayerController 사용
 
 // Sets default values
 AEnemyParent::AEnemyParent()
@@ -49,13 +50,56 @@ void AEnemyParent::BeginPlay()
 
 	if (SpawnMontage) EnemyAnim->PlayMongtage(SpawnMontage);
 
+	TargetPlayer = UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetPawn();
+
 	IsDying = false;
 
 	if (EnemyAnim) {
 		// 죽음에 도달하면 이 엑터는 사라진다.
 		EnemyAnim->DieCheck.AddLambda([this]()-> void {
-			IsDying = false;
 			Destroy();
+		});
+
+		// 스폰 몽타주가 끝나면 비헤비어 트리를 작동한다.
+		EnemyAnim->SpawnCheck.AddLambda([this]()->void {
+			Cast<AEnemyAIController>(GetController())->RunBT();
+		});
+
+		// 공격 타이밍에 맞춰 sweep trace를 실행
+		EnemyAnim->AttackCheck.AddLambda([this]()->void {
+			float AttackRange = 200.0f;
+			float AttackRadius = 50.0f;
+			FHitResult HitResult;
+			// FCollisionQueryParams (이 충돌을 식별할 태그 값, 복잡한 충돌 연산을 할 것이냐, 충돌 무시 오브젝트)
+			FCollisionQueryParams Params(EName::None, false, this);
+			bool tmp = GetWorld()->SweepSingleByChannel(
+				HitResult,
+				GetActorLocation(),
+				GetActorLocation() + GetActorForwardVector() * AttackRange,
+				FQuat::Identity,
+				ECollisionChannel::ECC_GameTraceChannel2,
+				FCollisionShape::MakeSphere(AttackRadius),
+				Params);
+
+#if ENABLE_DRAW_DEBUG
+			FVector TraceVector = GetActorForwardVector() * AttackRange;
+			FVector Center = GetActorLocation() + TraceVector * 0.5f;
+			float HalfHeight = AttackRange * 0.5f + AttackRadius;
+			FQuat CapsuleRot = FRotationMatrix::MakeFromZ(TraceVector).ToQuat();
+			FColor DrawColor = tmp ? FColor::Green : FColor::Red;
+			float DebugTime = 5.0f;
+
+			DrawDebugCapsule(
+				GetWorld(),
+				Center,
+				HalfHeight,
+				AttackRadius,
+				CapsuleRot,
+				DrawColor,
+				false,
+				DebugTime
+				);
+#endif
 		});
 	}
 
@@ -82,9 +126,15 @@ void AEnemyParent::OnDamaged(float _Damage) {
 		IsDying = true;
 		EnemyCurrentHP = 0;
 		if (DieMongtage && EnemyAnim) {
+			Cast<AEnemyAIController>(GetController())->StopBT();
+			EnemyAnim->StopCurrentMongtage();
 			EnemyAnim->PlayMongtage(DieMongtage);
 		}
 	}
 	Cast<UEnemyWidget>(EWidget->GetWidget())->SetHPBarPercent(EnemyCurrentHP, EnemyMaxHP);
 	Cast<UEnemyWidget>(EWidget2->GetWidget())->SetHPBarPercent(EnemyCurrentHP, EnemyMaxHP);
+}
+
+float AEnemyParent::EnemyAttack() {
+	return EnemyAnim->PlayMongtage(AttackMontage1);
 }

@@ -25,6 +25,7 @@ public:
 	// Black Board에서 가져온 키값을 담을 변수
 	static const FName KeyRandomPosition;
 	static const FName KeyTargetPosition;
+	static const FName KeyMongtageTime;
 
 public:
 	AEnemyAIController();

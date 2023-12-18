@@ -72,6 +72,16 @@ private:
 	UPROPERTY(VisibleAnywhere)
 		float CurrentMP;
 
+	// 업그레이드 변수들
+	UPROPERTY(VisibleAnywhere)
+		float AttackSpeed;
+	UPROPERTY(VisibleAnywhere)
+		float CoolTimeDown;
+	UPROPERTY(VisibleAnywhere)
+		float BaseDamage;
+	UPROPERTY(VisibleAnywhere)
+		float BaseGuard;
+
 public:
 	// 데이터 테이블에서 가져온 변수를 저장할 맵
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly)

@@ -54,6 +54,11 @@ AMyCharacter::AMyCharacter()
 	CameraZoomMax = 800.f;
 	CameraRotateScale = 1.f;							// 특정 스킬 중에는 카메라 회전 속도를 조절하기 위한 변수
 	//
+	// 업그레이드 변수
+	AttackSpeed = 1.0f;
+	CoolTimeDown = 1.0f;
+	BaseDamage = 0.0f;
+	BaseGuard = 0.0f;
 	////////////////////////////////
 
 	// Component 생성
@@ -80,6 +85,13 @@ AMyCharacter::AMyCharacter()
 		GetMesh()->SetRelativeLocationAndRotation(FVector(0.f, 0.f, -88.f), FRotator(0.f, -90.f, 0.f));
 		//GetArrowComponent()->SetupAttachment(GetMesh());
 	}
+
+	// 충돌 설정
+	GetMesh()->SetCollisionProfileName("PlayerMesh");
+	GetMesh()->SetGenerateOverlapEvents(true);
+	GetMesh()->SetNotifyRigidBodyCollision(true);
+	GetCapsuleComponent()->SetGenerateOverlapEvents(false);
+	GetCapsuleComponent()->SetNotifyRigidBodyCollision(false);
 
 	// 스킬 데이터 테이블 생성
 	static ConstructorHelpers::FObjectFinder<UDataTable> SKILL_DATA_TABLE(
@@ -284,6 +296,7 @@ void AMyCharacter::BeginPlay()
 	// 헤비 어택 차지 정도를 감지했을 때 실행되는 델리게이트
 	// 차지 정도가 낮으면 1타만 실행하고 차지가 만족되면 2타 준비를 한다.
 	MyAnim->OnNoChargeAttackCheck.AddLambda([this]()-> void {
+		IsAttackAble = false;
 		Weapon->PlayEffect("Charge1");
 		if (ActionState == "HeavyCharging") {
 			if (IsCharge == 0) IsCharge = 1;
@@ -414,7 +427,7 @@ void AMyCharacter::DashEnd(const FInputActionValue& Value) {
 void AMyCharacter::JumpAction(const FInputActionValue& Value) {
 	if (ActionState != "Idle") return;
 	ActionState = "Jump";
-	MyAnim->PlayMongtage("Jump");
+	MyAnim->PlayMongtage("Jump", AttackSpeed);
 	Jump();// 점프는 언리얼에서 함수를 구현해 놨다.
 }
 
@@ -449,27 +462,46 @@ void AMyCharacter::CameraZoom(const FInputActionValue& Value) {
 
 // HP 조절 함수
 void AMyCharacter::DiffHP(float _HP) {
-	CurrentHP += _HP;
-	UI_Skill->HPBar->SetPercent(CurrentHP / CharacterState.FindRef("MaxHP"));
+	float _MaxHP = CharacterState.FindRef("MaxHP");
+	if (_HP < 0) CurrentHP += _HP + BaseGuard;
+	else {
+		CurrentHP += _HP;
+		if (CurrentHP > _MaxHP) {
+			CurrentHP = _MaxHP;
+		}
+	}
+	UI_Skill->HPBar->SetPercent(CurrentHP / _MaxHP);
 }
 // MP 조절 함수
 void AMyCharacter::DiffMP(float _MP) {
+	float _MaxMP = CharacterState.FindRef("MaxMP");
 	IsRecoverMP = 0;
 	GetWorldTimerManager().ClearTimer(RecoverMPTimerHandle);
 	CurrentMP += _MP;
+	if (CurrentMP > _MaxMP) {
+		CurrentMP = _MaxMP;
+	}
 	UI_Skill->MPBar->SetPercent(CurrentMP / CharacterState.FindRef("MaxMP"));
 }
 
 // HP 자연 회복 함수
 void AMyCharacter::NaturalRecoverHP() {
+	float _MaxHP = CharacterState.FindRef("MaxHP");
 	CurrentHP += CharacterState.FindRef("RecoveryHPValue");
-	UI_Skill->HPBar->SetPercent(CurrentHP / CharacterState.FindRef("MaxHP"));
+	if (CurrentHP > _MaxHP) {
+		CurrentHP = _MaxHP;
+	}
+	UI_Skill->HPBar->SetPercent(CurrentHP / _MaxHP);
 }
 
 // MP 자연 회복 함수
 void AMyCharacter::NaturalRecoverMP() {
+	float _MaxMP = CharacterState.FindRef("MaxMP");
 	CurrentMP += CharacterState.FindRef("RecoveryMPValue");
-	UI_Skill->MPBar->SetPercent(CurrentMP / CharacterState.FindRef("MaxMP"));
+	if (CurrentMP > _MaxMP) {
+		CurrentMP = _MaxMP;
+	}
+	UI_Skill->MPBar->SetPercent(CurrentMP / _MaxMP);
 }
 
 
@@ -482,11 +514,11 @@ void AMyCharacter::NaturalRecoverMP() {
 void AMyCharacter::ComboAttack(const FInputActionValue& Value) {
 	if (ActionState == "Idle") {
 		ActionState = "Combo";
-		MyAnim->PlayMongtage("Combo");
-		DamageValue = SkillData.FindRef("LSkillDamage");
+		MyAnim->PlayMongtage("Combo", AttackSpeed);
+		DamageValue = SkillData.FindRef("LSkillDamage") + BaseDamage;
 	}
 	else if (ActionState == "SprintAttackPossible") {
-		DamageValue = SkillData.FindRef("QSkillDamage");
+		DamageValue = SkillData.FindRef("QSkillDamage") + BaseDamage;
 		QSkillRunValue = 0.f;
 		UI_Skill->MLDisable();
 		UI_Skill->ChargeBarDisable();
@@ -496,7 +528,7 @@ void AMyCharacter::ComboAttack(const FInputActionValue& Value) {
 		TargetPosition = GetActorLocation() + GetCapsuleComponent()->GetForwardVector() * 500;
 	}
 	else if (ActionState == "Dodge") {
-		DamageValue = SkillData.FindRef("CSkillDamage");
+		DamageValue = SkillData.FindRef("CSkillDamage") + BaseDamage;
 		ActionState = "DodgeAttackPossible";
 	}
 	else {
@@ -513,7 +545,7 @@ void AMyCharacter::SprintAttack(const FInputActionValue& Value) {
 		GetWorldTimerManager().SetTimer(QSkillTimerHandle, this, &AMyCharacter::QSkillCoolTime, SkillCoolRate, true, 0);
 		GetWorldTimerManager().SetTimer(QSkillRunTimerHandle, this, &AMyCharacter::QSkillRunTime, SkillCoolRate, true, 0);
 		ActionState = "Sprint";
-		MyAnim->PlayMongtage("Sprint");
+		MyAnim->PlayMongtage("Sprint", AttackSpeed);
 		CameraRotateScale = 0.1f;
 	}
 }
@@ -526,14 +558,14 @@ void AMyCharacter::Dodge(const FInputActionValue& Value) {
 		UI_Skill->IconSizeDown("C");
 		GetWorldTimerManager().SetTimer(CSkillTimerHandle, this, &AMyCharacter::CSkillCoolTime, SkillCoolRate, true, 0);
 		ActionState = "Dodge";
-		MyAnim->PlayMongtage("Dodge");
+		MyAnim->PlayMongtage("Dodge", AttackSpeed);
 	}
 }
 
 // 강한 공격, 차지를 통해 더 강하게 때릴수 있다.
 void AMyCharacter::HeavyAttack(const FInputActionValue& Value) {
 	if (ActionState == "Idle" && MRSkillCoolValue == 0 && CurrentMP >= SkillData.FindRef("MRMP")) {
-		DamageValue = SkillData.FindRef("MRSkillDamage");
+		DamageValue = SkillData.FindRef("MRSkillDamage") + BaseDamage;
 		DiffMP(-SkillData.FindRef("MRMP"));
 		UI_Skill->ChargeBarActivate("MR");
 		UI_Skill->IconSizeDown("MR");
@@ -541,7 +573,7 @@ void AMyCharacter::HeavyAttack(const FInputActionValue& Value) {
 		GetWorldTimerManager().SetTimer(MRSkillChargeTimerHandle, this, &AMyCharacter::MRSkillChargeTime, SkillCoolRate, true, 0);
 		CameraRotateScale = 0.1f;
 		ActionState = "HeavyCharging";
-		MyAnim->PlayMongtage("Heavy");
+		MyAnim->PlayMongtage("Heavy", AttackSpeed);
 	}
 }
 
@@ -569,7 +601,7 @@ void AMyCharacter::AttackEnded(UAnimMontage* Montage, bool bInterrupted) {
 
 void AMyCharacter::QSkillCoolTime() {
 	QSkillCoolValue += SkillCoolRate;
-	float MaxTime = SkillData.FindRef("QSkillCoolTime");
+	float MaxTime = SkillData.FindRef("QSkillCoolTime") * CoolTimeDown;
 	UI_Skill->QSkill->SetPercent((MaxTime - QSkillCoolValue) / MaxTime);
 	if (QSkillCoolValue >= MaxTime) {
 		QSkillCoolValue = 0.f;
@@ -580,7 +612,7 @@ void AMyCharacter::QSkillCoolTime() {
 
 void AMyCharacter::CSkillCoolTime() {
 	CSkillCoolValue += SkillCoolRate;
-	float MaxTime = SkillData.FindRef("CSkillCoolTime");
+	float MaxTime = SkillData.FindRef("CSkillCoolTime") * CoolTimeDown;
 	UI_Skill->CSkill->SetPercent((MaxTime - CSkillCoolValue) / MaxTime);
 	if (CSkillCoolValue >= MaxTime) {
 		CSkillCoolValue = 0.f;
@@ -591,7 +623,7 @@ void AMyCharacter::CSkillCoolTime() {
 
 void AMyCharacter::MRSkillCoolTime() {
 	MRSkillCoolValue += SkillCoolRate;
-	float MaxTime = SkillData.FindRef("MRSkillCoolTime");
+	float MaxTime = SkillData.FindRef("MRSkillCoolTime") * CoolTimeDown;
 	UI_Skill->MRSkill->SetPercent((MaxTime - MRSkillCoolValue) / MaxTime);
 	if (MRSkillCoolValue >= MaxTime) {
 		MRSkillCoolValue = 0.f;
@@ -604,7 +636,7 @@ void AMyCharacter::MRSkillCoolTime() {
 
 void AMyCharacter::QSkillRunTime() {
 	QSkillRunValue += SkillCoolRate;
-	float MaxTime = SkillData.FindRef("QMaxRunTime");
+	float MaxTime = SkillData.FindRef("QMaxRunTime") * CoolTimeDown;
 	UI_Skill->ChargeBar->SetPercent((MaxTime - QSkillRunValue) / MaxTime);
 	if (QSkillRunValue >= MaxTime) {
 		MyAnim->StopMontage("Sprint");
@@ -622,7 +654,7 @@ void AMyCharacter::MRSkillChargeTime() {
 	float MaxChargeValue = SkillData.FindRef("MRMaxChargeValue");
 	UI_Skill->ChargeBar->SetPercent(ChargeValue / CompleteChageTime);
 	if (ChargeValue >= CompleteChageTime && ChargeValue < MaxChargeValue) {
-		DamageValue = SkillData.FindRef("MRSkillDamage2");
+		DamageValue = SkillData.FindRef("MRSkillDamage2") + BaseDamage;
 		IsCharge = 2;
 	}
 	else if (ChargeValue >= MaxChargeValue) {

@@ -4,6 +4,7 @@
 #include "Enemy_Bear.h"
 #include "EnemyAIController.h"
 #include "EnemyAnimInstance.h"
+#include "GameFramework/CharacterMovementComponent.h" // CharacterMovement를 사용하기 위해
 
 AEnemy_Bear::AEnemy_Bear() {
 	PrimaryActorTick.bCanEverTick = true;
@@ -28,7 +29,14 @@ AEnemy_Bear::AEnemy_Bear() {
 		TEXT("AnimMontage'/Game/InfinityBladeAdversaries/Enemy/Enemy_Bear/Montage/Spawn.Spawn'"));
 	if (SPAWN_MONTAGE.Succeeded()) SpawnMontage = SPAWN_MONTAGE.Object;
 
+	// 공격 몽타주 생성
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> ATTACK1_MONTAGE(
+		TEXT("AnimMontage'/Game/InfinityBladeAdversaries/Enemy/Enemy_Bear/Montage/Attack'"));
+	if (SPAWN_MONTAGE.Succeeded()) AttackMontage1 = ATTACK1_MONTAGE.Object;
+
 	AIControllerClass = AEnemyAIController::StaticClass();
+
+	GetCharacterMovement()->MaxWalkSpeed = 150;
 }
 
 void AEnemy_Bear::PostInitializeComponents() {

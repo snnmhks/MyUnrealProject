@@ -7,11 +7,27 @@ UEnemyAnimInstance::UEnemyAnimInstance() {
 
 }
 
-void UEnemyAnimInstance::PlayMongtage(UAnimMontage* _Mongtage) {
+void UEnemyAnimInstance::NativeBeginPlay() {
+	Super::NativeBeginPlay();
+}
 
-	Montage_Play(_Mongtage, 1.0f);
+float UEnemyAnimInstance::PlayMongtage(UAnimMontage* _Mongtage) {
+	CurrentMongtage = _Mongtage;
+	return Montage_Play(_Mongtage, 1.0f);
 }
 
 void UEnemyAnimInstance::AnimNotify_EndDie() {
 	DieCheck.Broadcast();
+}
+
+void UEnemyAnimInstance::AnimNotify_SpawnFinish() {
+	SpawnCheck.Broadcast();
+}
+
+void UEnemyAnimInstance::AnimNotify_Attacking() {
+	AttackCheck.Broadcast();
+}
+
+void UEnemyAnimInstance::StopCurrentMongtage() {
+	if (CurrentMongtage) Montage_Stop(0.0f, CurrentMongtage);
 }

@@ -58,7 +58,7 @@ public:
 public:
 	// 몽타주 재생 함수
 	UFUNCTION()
-		void PlayMongtage(FString Name);
+		void PlayMongtage(FString Name, float PlaySpeed);
 	// 몽타주 멈추는 함수
 	UFUNCTION()
 		void StopMontage(FString Name);

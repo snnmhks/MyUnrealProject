@@ -27,6 +27,10 @@ private:
 
 public:
 
+	// 플레이어
+	UPROPERTY(VisibleAnywhere)
+		class APawn* TargetPlayer;
+
 	// 캐릭터에 적용할 애니메이션
 	UPROPERTY(VisibleAnywhere)
 		class UEnemyAnimInstance* EnemyAnim;
@@ -45,6 +49,10 @@ public:
 	UPROPERTY(VisibleAnywhere)
 		UAnimMontage* SpawnMontage;
 
+	// 공격 몽타주
+	UPROPERTY(VisibleAnywhere)
+		UAnimMontage* AttackMontage1;
+
 public:
 	// Sets default values for this pawn's properties
 	AEnemyParent();
@@ -62,4 +70,6 @@ public:
 
 	// 데미지를 받으면 호출할 함수
 	void OnDamaged(float _Damage);
+
+	float EnemyAttack();
 };
