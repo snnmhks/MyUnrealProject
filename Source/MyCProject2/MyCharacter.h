@@ -86,6 +86,9 @@ public:
 	// 데이터 테이블에서 가져온 변수를 저장할 맵
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly)
 		TMap<FString, float> SkillData;
+	// 박스의 형태는 (가로, 높이, 세로)
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly)
+		TMap<FString, FVector> SkillArea;
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly)
 		TMap<FString, float> CharacterState;
 	// 입력으로 주어지는 움직임 값으로 블랜딩 한다.
@@ -112,6 +115,11 @@ public:
 	// 전달할 데미지 값
 	UPROPERTY(VisibleAnywhere)
 		float DamageValue;
+	// Sweep Trace 용 값
+	UPROPERTY(VisibleAnywhere)
+		float AttackRange;
+	UPROPERTY(VisibleAnywhere)
+		FVector AttackBox;
 	// 이 스트링 값으로 현재 캐릭터의 상태를 나타내고 여러 상태가 겹쳐서 발생하지 않도록 한다.
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly)
 		FString ActionState;

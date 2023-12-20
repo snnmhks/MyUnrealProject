@@ -189,12 +189,30 @@ void AMyCharacter::SetSkillValue() {
 
 	SkillData.Add("QSkillDamage", tmp->QSkillDamage);
 	SkillData.Add("CSkillDamage", tmp->CSkillDamage);
-	SkillData.Add("MRSkillDamage", tmp->MRSkillDamage);
+	SkillData.Add("MRSkillDamage1", tmp->MRSkillDamage1);
 	SkillData.Add("MRSkillDamage2", tmp->MRSkillDamage2);
-	SkillData.Add("LSkillDamage", tmp->LSkillDamage);
+	SkillData.Add("LSkillDamage1", tmp->LSkillDamage1);
 	SkillData.Add("LSkillDamage2", tmp->LSkillDamage2);
 	SkillData.Add("LSkillDamage3", tmp->LSkillDamage3);
 	SkillData.Add("LSkillDamage4", tmp->LSkillDamage4);
+
+	SkillData.Add("QSkillRange", tmp->QSkillRange);
+	SkillData.Add("CSkillRange", tmp->CSkillRange);
+	SkillData.Add("MRSkillRange1", tmp->MRSkillRange1);
+	SkillData.Add("MRSkillRange2", tmp->MRSkillRange2);
+	SkillData.Add("LSkillRange1", tmp->LSkillRange1);
+	SkillData.Add("LSkillRange2", tmp->LSkillRange2);
+	SkillData.Add("LSkillRange3", tmp->LSkillRange3);
+	SkillData.Add("LSkillRange4", tmp->LSkillRange4);
+
+	SkillArea.Add("QSkillBox", tmp->QSkillBox);
+	SkillArea.Add("CSkillBox", tmp->CSkillBox);
+	SkillArea.Add("MRSkillBox1", tmp->MRSkillBox1);
+	SkillArea.Add("MRSkillBox2", tmp->MRSkillBox2);
+	SkillArea.Add("LSkillBox1", tmp->LSkillBox1);
+	SkillArea.Add("LSkillBox2", tmp->LSkillBox2);
+	SkillArea.Add("LSkillBox3", tmp->LSkillBox3);
+	SkillArea.Add("LSkillBox4", tmp->LSkillBox4);
 
 	SkillData.Add("QMaxRunTime", tmp->QMaxRunTime);
 	SkillData.Add("MRCompleteChargeValue", tmp->MRCompleteChargeValue);
@@ -269,13 +287,23 @@ void AMyCharacter::BeginPlay()
 			MyAnim->NextCombo(ComboNum, "Combo");
 			switch (ComboNum) {
 			case 2:
+				ActionState = "ComboAttack2";
 				DamageValue = SkillData.FindRef("LSkillDamage2");
+				AttackRange = SkillData.FindRef("LSkillRange2");
+				AttackBox = SkillArea.FindRef("LSkillBox2");
 				break;
 			case 3:
+				ActionState = "ComboAttack3";
 				DamageValue = SkillData.FindRef("LSkillDamage3");
+				AttackRange = SkillData.FindRef("LSkillRange3");
+				AttackBox = SkillArea.FindRef("LSkillBox3");
+				IsCombo = 1;
 				break;
 			case 4:
+				ActionState = "ComboAttack4";
 				DamageValue = SkillData.FindRef("LSkillDamage4");
+				AttackRange = SkillData.FindRef("LSkillRange4");
+				AttackBox = SkillArea.FindRef("LSkillBox4");
 				break;
 			}
 		}
@@ -297,9 +325,11 @@ void AMyCharacter::BeginPlay()
 	// 차지 정도가 낮으면 1타만 실행하고 차지가 만족되면 2타 준비를 한다.
 	MyAnim->OnNoChargeAttackCheck.AddLambda([this]()-> void {
 		IsAttackAble = false;
-		Weapon->PlayEffect("Charge1");
 		if (ActionState == "HeavyCharging") {
-			if (IsCharge == 0) IsCharge = 1;
+			if (IsCharge == 0) {
+				Weapon->PlayEffect("Charge1");
+				IsCharge = 1;
+			}
 			else if (IsCharge == 1) {
 				ActionState = "HeavyAttack";
 				MyAnim->JumpToHeavy1();
@@ -310,22 +340,61 @@ void AMyCharacter::BeginPlay()
 	MyAnim->OnChargeAttackCheck.AddLambda([this]()-> void {
 		IsAttackAble = false;
 		if (IsCharge == 2) {
+			ActionState = "HeavyAttack2";
 			MyAnim->JumpToHeavy2();
+			DamageValue = SkillData.FindRef("MRSkillDamage2") + BaseDamage;
+			AttackRange = SkillData.FindRef("MRSkillRange2");
+			AttackBox = SkillArea.FindRef("MRSkillBox2");
 		}
 	});
 
 	// 타격 유무를 감지하는 델리게이트
 	MyAnim->OnAttackAble.AddLambda([this]()->void {
-		if (IsAttackAble) {
-			IsAttackAble = false;
-			if (IsValid(TargetEnemy)) {
-				Weapon->HitFunction(TargetEnemy);
+		TArray<struct FHitResult> HitResult;
+		// FCollisionQueryParams (이 충돌을 식별할 태그 값, 복잡한 충돌 연산을 할 것이냐, 충돌 무시 오브젝트)
+		FCollisionQueryParams Params(EName::None, false, this);
+		// SweepSingleByChannel(충돌 결과를 저장할 구조체, 시작 지점, 끝나는 지점, 회전, Trace 채널 설정, Trace 모양)
+		bool IsHit = GetWorld()->SweepMultiByObjectType(
+			HitResult,
+			GetActorLocation(),
+			GetActorLocation() + GetActorForwardVector() * AttackRange,
+			FQuat::Identity,
+			ECollisionChannel::ECC_GameTraceChannel3,
+			FCollisionShape::MakeBox(AttackBox),
+			Params);
+		if (IsHit) {
+			TArray<FString> BeforeName;
+			for (FHitResult SweepActor: HitResult) { // HitResult의 모든 원소에 대해 루프 진행, 범위 기반 루프
+				AEnemyParent* SweepEnemy = Cast<AEnemyParent>(SweepActor.GetActor());
+				if (SweepEnemy && !BeforeName.Contains(SweepEnemy->GetName())) {
+					BeforeName.Add(SweepEnemy->GetName());
+					Weapon->PlayEffect("Hit", SweepActor.ImpactPoint);
+					SweepEnemy->OnDamaged(DamageValue);
+				}
 			}
 		}
-		else {
-			IsAttackAble = true;
-		}
+
+#if ENABLE_DRAW_DEBUG
+		FVector TraceVector = GetActorForwardVector() * AttackRange;
+		FVector Center = GetActorLocation() + TraceVector * 0.5f;
+		// 바라 보는 방향 기준 BoxExtent(가로, 높이, 거리)
+		FVector BoxExtent = FVector(AttackBox.Y, AttackBox.X, AttackRange * 0.5f);
+		FQuat BoxRotate = FRotationMatrix::MakeFromZ(TraceVector).ToQuat();
+		FColor DrawColor = IsHit ? FColor::Green : FColor::Red;
+		float DebugTime = 5.0f;
+
+		DrawDebugBox(
+			GetWorld(),
+			Center,
+			BoxExtent,
+			BoxRotate,
+			DrawColor,
+			false,
+			DebugTime
+		);
+#endif
 	});
+
 	MyAnim->OnAttackDisable.AddLambda([this]()->void {
 		IsAttackAble = false;
 	});
@@ -513,12 +582,13 @@ void AMyCharacter::NaturalRecoverMP() {
 // 기본 콤보 공격
 void AMyCharacter::ComboAttack(const FInputActionValue& Value) {
 	if (ActionState == "Idle") {
-		ActionState = "Combo";
+		ActionState = "ComboAttack1";
 		MyAnim->PlayMongtage("Combo", AttackSpeed);
-		DamageValue = SkillData.FindRef("LSkillDamage") + BaseDamage;
+		DamageValue = SkillData.FindRef("LSkillDamage1") + BaseDamage;
+		AttackRange = SkillData.FindRef("LSkillRange1");
+		AttackBox = SkillArea.FindRef("LSkillBox1");
 	}
 	else if (ActionState == "SprintAttackPossible") {
-		DamageValue = SkillData.FindRef("QSkillDamage") + BaseDamage;
 		QSkillRunValue = 0.f;
 		UI_Skill->MLDisable();
 		UI_Skill->ChargeBarDisable();
@@ -526,17 +596,22 @@ void AMyCharacter::ComboAttack(const FInputActionValue& Value) {
 		ActionState = "SprintAttack";
 		MyAnim->NextCombo(2, "Sprint");
 		TargetPosition = GetActorLocation() + GetCapsuleComponent()->GetForwardVector() * 500;
+		DamageValue = SkillData.FindRef("QSkillDamage") + BaseDamage;
+		AttackRange = SkillData.FindRef("QSkillRange");
+		AttackBox = SkillArea.FindRef("QSkillBox");
 	}
 	else if (ActionState == "Dodge") {
-		DamageValue = SkillData.FindRef("CSkillDamage") + BaseDamage;
 		ActionState = "DodgeAttackPossible";
+		DamageValue = SkillData.FindRef("CSkillDamage") + BaseDamage;
+		AttackRange = SkillData.FindRef("CSkillRange");
+		AttackBox = SkillArea.FindRef("CSkillBox");
 	}
 	else {
 		IsCombo = 1;
 	}
 }
 
-// 스프린트 공격
+// 스프린트 시작
 void AMyCharacter::SprintAttack(const FInputActionValue& Value) {
 	if (ActionState == "Idle" && QSkillCoolValue == 0 && CurrentMP >= SkillData.FindRef("QMP")) {
 		DiffMP(-SkillData.FindRef("QMP"));
@@ -546,7 +621,7 @@ void AMyCharacter::SprintAttack(const FInputActionValue& Value) {
 		GetWorldTimerManager().SetTimer(QSkillRunTimerHandle, this, &AMyCharacter::QSkillRunTime, SkillCoolRate, true, 0);
 		ActionState = "Sprint";
 		MyAnim->PlayMongtage("Sprint", AttackSpeed);
-		CameraRotateScale = 0.1f;
+		CameraRotateScale = 0.2f;
 	}
 }
 
@@ -565,7 +640,6 @@ void AMyCharacter::Dodge(const FInputActionValue& Value) {
 // 강한 공격, 차지를 통해 더 강하게 때릴수 있다.
 void AMyCharacter::HeavyAttack(const FInputActionValue& Value) {
 	if (ActionState == "Idle" && MRSkillCoolValue == 0 && CurrentMP >= SkillData.FindRef("MRMP")) {
-		DamageValue = SkillData.FindRef("MRSkillDamage") + BaseDamage;
 		DiffMP(-SkillData.FindRef("MRMP"));
 		UI_Skill->ChargeBarActivate("MR");
 		UI_Skill->IconSizeDown("MR");
@@ -574,6 +648,9 @@ void AMyCharacter::HeavyAttack(const FInputActionValue& Value) {
 		CameraRotateScale = 0.1f;
 		ActionState = "HeavyCharging";
 		MyAnim->PlayMongtage("Heavy", AttackSpeed);
+		DamageValue = SkillData.FindRef("MRSkillDamage1") + BaseDamage;
+		AttackRange = SkillData.FindRef("MRSkillRange1");
+		AttackBox = SkillArea.FindRef("MRSkillBox1");
 	}
 }
 
@@ -650,11 +727,10 @@ void AMyCharacter::QSkillRunTime() {
 // MR 스킬 차징 함수
 void AMyCharacter::MRSkillChargeTime() {
 	ChargeValue += SkillCoolRate;
-	float CompleteChageTime = SkillData.FindRef("MRCompleteChargeValue");
+	float CompleteChargeTime = SkillData.FindRef("MRCompleteChargeValue");
 	float MaxChargeValue = SkillData.FindRef("MRMaxChargeValue");
-	UI_Skill->ChargeBar->SetPercent(ChargeValue / CompleteChageTime);
-	if (ChargeValue >= CompleteChageTime && ChargeValue < MaxChargeValue) {
-		DamageValue = SkillData.FindRef("MRSkillDamage2") + BaseDamage;
+	UI_Skill->ChargeBar->SetPercent(ChargeValue / CompleteChargeTime);
+	if (ChargeValue >= CompleteChargeTime && ChargeValue < MaxChargeValue) {
 		IsCharge = 2;
 	}
 	else if (ChargeValue >= MaxChargeValue) {

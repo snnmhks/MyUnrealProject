@@ -62,7 +62,7 @@ void AEnemyParent::BeginPlay()
 
 		// 스폰 몽타주가 끝나면 비헤비어 트리를 작동한다.
 		EnemyAnim->SpawnCheck.AddLambda([this]()->void {
-			Cast<AEnemyAIController>(GetController())->RunBT();
+			//Cast<AEnemyAIController>(GetController())->RunBT();
 		});
 
 		// 공격 타이밍에 맞춰 sweep trace를 실행
@@ -70,9 +70,8 @@ void AEnemyParent::BeginPlay()
 			float AttackRange = 200.0f;
 			float AttackRadius = 50.0f;
 			FHitResult HitResult;
-			// FCollisionQueryParams (이 충돌을 식별할 태그 값, 복잡한 충돌 연산을 할 것이냐, 충돌 무시 오브젝트)
 			FCollisionQueryParams Params(EName::None, false, this);
-			bool tmp = GetWorld()->SweepSingleByChannel(
+			bool IsHit = GetWorld()->SweepSingleByChannel(
 				HitResult,
 				GetActorLocation(),
 				GetActorLocation() + GetActorForwardVector() * AttackRange,
@@ -86,7 +85,7 @@ void AEnemyParent::BeginPlay()
 			FVector Center = GetActorLocation() + TraceVector * 0.5f;
 			float HalfHeight = AttackRange * 0.5f + AttackRadius;
 			FQuat CapsuleRot = FRotationMatrix::MakeFromZ(TraceVector).ToQuat();
-			FColor DrawColor = tmp ? FColor::Green : FColor::Red;
+			FColor DrawColor = IsHit ? FColor::Green : FColor::Red;
 			float DebugTime = 5.0f;
 
 			DrawDebugCapsule(

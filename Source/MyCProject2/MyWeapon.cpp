@@ -42,36 +42,19 @@ AMyWeapon::AMyWeapon()
 		TEXT("ParticleSystem'/Game/InfinityBladeEffects/Effects/FX_Skill_Leap/P_Skill_Leap_Base_Charge_Weapon'"));
 	if (CHARGE_EFFECT2_MESH.Succeeded()) ChargeEffect2 = CHARGE_EFFECT2_MESH.Object;
 
-	// Component »ý¼º
-	HitCapsule = CreateDefaultSubobject<UCapsuleComponent>(TEXT("HitCapsule"));
-	HitCapsule->SetupAttachment(WeaponMesh);
-	HitCapsule->SetRelativeLocationAndRotation(FVector(0.0f, -90.0f, 0.0f), FRotator(0.0f, 0.0f, -90.0f));
-	HitCapsule->SetCapsuleHalfHeight(90.0f);
-	HitCapsule->SetCapsuleRadius(50.0f);
-	HitCapsule->SetCollisionProfileName("HittedCapsule");
-	HitCapsule->SetGenerateOverlapEvents(true);
-	HitCapsule->SetNotifyRigidBodyCollision(false);
-
 }
 
 // Called when the game starts or when spawned
 void AMyWeapon::BeginPlay()
 {
 	Super::BeginPlay();
-	HitCapsule->OnComponentBeginOverlap.AddDynamic(this, &AMyWeapon::OnHit);
-	HitCapsule->OnComponentEndOverlap.AddDynamic(this, &AMyWeapon::OnHitEnd);
+
 }
 
 // Called every frame
 void AMyWeapon::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-}
-
-void AMyWeapon::HitFunction(AEnemyParent* _Enemy) {
-	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitEffect, EmitterPoint->GetComponentLocation() + FVector(0.0f, 0.0f, 70.0f));
-	WeoponOwner->IsAttackAble = false;
-	_Enemy->OnDamaged(WeoponOwner->DamageValue);
 }
 
 void AMyWeapon::PlayEffect(FName _Name) {
@@ -81,22 +64,10 @@ void AMyWeapon::PlayEffect(FName _Name) {
 	else if (_Name == "Charge2") {
 		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitEffect, EmitterPoint->GetComponentLocation(), FRotator::ZeroRotator, FVector(3.f));
 	}
-
 }
 
-void AMyWeapon::OnHit(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) {
-	AEnemyParent* Enemy = Cast<AEnemyParent> (OtherActor);
-	if (Enemy && WeoponOwner) {
-		if (WeoponOwner->IsAttackAble) {
-			HitFunction(Enemy);
-		}
-		else {
-			WeoponOwner->IsAttackAble = true;
-			WeoponOwner->TargetEnemy = Enemy;
-		}
+void AMyWeapon::PlayEffect(FName _Name, FVector SpawnLocation) {
+	if (_Name == "Hit") {
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitEffect, SpawnLocation, FRotator::ZeroRotator, FVector(3.f));
 	}
-}
-
-void AMyWeapon::OnHitEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex) {
-	WeoponOwner->IsAttackAble = false;
 }
