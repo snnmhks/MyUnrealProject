@@ -6,6 +6,7 @@
 #include "EnemyAIController.h"
 #include "EnemyWidget.h"
 #include "MyWeapon.h"
+#include "MyCharacter.h"
 #include "Components/WidgetComponent.h"
 #include "Kismet/GameplayStatics.h" // GetPlayerController 사용
 
@@ -19,7 +20,7 @@ AEnemyParent::AEnemyParent()
 	GetMesh()->SetAnimationMode(EAnimationMode::AnimationBlueprint);
 	GetMesh()->SetGenerateOverlapEvents(true);
 	GetMesh()->SetNotifyRigidBodyCollision(false);
-	GetMesh()->SetCollisionProfileName("PhysicsMesh");
+	GetMesh()->SetCollisionProfileName("EnemyMesh");
 	AIControllerClass = AEnemyAIController::StaticClass();
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
@@ -50,7 +51,7 @@ void AEnemyParent::BeginPlay()
 
 	if (SpawnMontage) EnemyAnim->PlayMongtage(SpawnMontage);
 
-	TargetPlayer = UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetPawn();
+	TargetPlayer = Cast<AMyCharacter>(UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetPawn());
 
 	IsDying = false;
 
@@ -62,7 +63,7 @@ void AEnemyParent::BeginPlay()
 
 		// 스폰 몽타주가 끝나면 비헤비어 트리를 작동한다.
 		EnemyAnim->SpawnCheck.AddLambda([this]()->void {
-			//Cast<AEnemyAIController>(GetController())->RunBT();
+			Cast<AEnemyAIController>(GetController())->RunBT();
 		});
 
 		// 공격 타이밍에 맞춰 sweep trace를 실행
@@ -79,6 +80,12 @@ void AEnemyParent::BeginPlay()
 				ECollisionChannel::ECC_GameTraceChannel2,
 				FCollisionShape::MakeSphere(AttackRadius),
 				Params);
+			if (IsHit) {
+				AMyCharacter* SweepCharacter = Cast<AMyCharacter>(HitResult.GetActor());
+				if (SweepCharacter && !(SweepCharacter->ActionState == "Die")) {
+					SweepCharacter->DiffHP(-EnemyDamage);
+				}
+			}
 
 #if ENABLE_DRAW_DEBUG
 			FVector TraceVector = GetActorForwardVector() * AttackRange;

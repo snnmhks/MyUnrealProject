@@ -348,6 +348,10 @@ void AMyCharacter::BeginPlay()
 		}
 	});
 
+	MyAnim->OnDieCheck.AddLambda([this]()-> void {
+		GetWorldTimerManager().SetTimer(DieTimerHandle, this, &AMyCharacter::Diying, 0.1, false, 1);
+	});
+
 	// 타격 유무를 감지하는 델리게이트
 	MyAnim->OnAttackAble.AddLambda([this]()->void {
 		TArray<struct FHitResult> HitResult;
@@ -356,11 +360,11 @@ void AMyCharacter::BeginPlay()
 		// SweepSingleByChannel(충돌 결과를 저장할 구조체, 시작 지점, 끝나는 지점, 회전, Trace 채널 설정, Trace 모양)
 		bool IsHit = GetWorld()->SweepMultiByObjectType(
 			HitResult,
-			GetActorLocation(),
-			GetActorLocation() + GetActorForwardVector() * AttackRange,
+			GetActorLocation() + GetActorForwardVector() * AttackBox.Z,
+			GetActorLocation() + GetActorForwardVector() * (AttackRange + AttackBox.Z),
 			FQuat::Identity,
 			ECollisionChannel::ECC_GameTraceChannel3,
-			FCollisionShape::MakeBox(AttackBox),
+			FCollisionShape::MakeBox(FVector(AttackBox.X, AttackBox.Y, 0.0f)),
 			Params);
 		if (IsHit) {
 			TArray<FString> BeforeName;
@@ -376,7 +380,7 @@ void AMyCharacter::BeginPlay()
 
 #if ENABLE_DRAW_DEBUG
 		FVector TraceVector = GetActorForwardVector() * AttackRange;
-		FVector Center = GetActorLocation() + TraceVector * 0.5f;
+		FVector Center = GetActorLocation() + TraceVector * 0.5f + GetActorForwardVector() * AttackBox.Z;
 		// 바라 보는 방향 기준 BoxExtent(가로, 높이, 거리)
 		FVector BoxExtent = FVector(AttackBox.Y, AttackBox.X, AttackRange * 0.5f);
 		FQuat BoxRotate = FRotationMatrix::MakeFromZ(TraceVector).ToQuat();
@@ -540,6 +544,10 @@ void AMyCharacter::DiffHP(float _HP) {
 		}
 	}
 	UI_Skill->HPBar->SetPercent(CurrentHP / _MaxHP);
+	if (CurrentHP <= 0) {
+		ActionState = "Die";
+		MyAnim->PlayMongtage("Die", 1.0f);
+	}
 }
 // MP 조절 함수
 void AMyCharacter::DiffMP(float _MP) {
@@ -666,6 +674,7 @@ void AMyCharacter::HeavyEnd(const FInputActionValue& Value) {
 
 // 몽타주가 끝나면 실행되는 함수 항상 캐릭터의 상태와 관련된 것들을 초기화 한다.
 void AMyCharacter::AttackEnded(UAnimMontage* Montage, bool bInterrupted) {
+	if (ActionState == "Die") return;
 	IsCombo = 0;
 	ActionState = "Idle";
 	ComboNum = 1;
@@ -739,4 +748,10 @@ void AMyCharacter::MRSkillChargeTime() {
 		UI_Skill->ChargeBarDisable();
 		GetWorldTimerManager().ClearTimer(MRSkillChargeTimerHandle);
 	}
+}
+
+void AMyCharacter::Diying() {
+	GetWorldTimerManager().ClearTimer(DieTimerHandle);
+	UE_LOG(LogTemp, Log, TEXT("Hello"));
+	Destroy();
 }

@@ -29,7 +29,7 @@ public:
 
 	// 플레이어
 	UPROPERTY(VisibleAnywhere)
-		class APawn* TargetPlayer;
+		class AMyCharacter* TargetPlayer;
 
 	// 캐릭터에 적용할 애니메이션
 	UPROPERTY(VisibleAnywhere)
@@ -40,6 +40,8 @@ public:
 		float EnemyMaxHP;
 	UPROPERTY(VisibleAnywhere)
 		float EnemyCurrentHP;
+	UPROPERTY(VisibleAnywhere)
+		float EnemyDamage;
 
 	// 죽는 몽타주
 	UPROPERTY(VisibleAnywhere)

@@ -5,6 +5,7 @@
 #include "EnemyAIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "NavigationSystem.h"
+#include "MyCharacter.h"
 #include "GameFramework/Controller.h"
 #include "EnemyParent.h"
 
@@ -20,8 +21,8 @@ EBTNodeResult::Type UBTT_FindRandomPosition::ExecuteTask(UBehaviorTreeComponent&
 	UNavigationSystemV1* NavSystem = UNavigationSystemV1::GetNavigationSystem(ControllingPawn->GetWorld());
 	if (nullptr == NavSystem) return EBTNodeResult::Failed;
 
-	APawn* TargetPlayer = Cast<AEnemyParent>(ControllingPawn)->TargetPlayer;
-	if (TargetPlayer) {
+	AMyCharacter* TargetPlayer = Cast<AEnemyParent>(ControllingPawn)->TargetPlayer;
+	if (TargetPlayer && !(TargetPlayer->ActionState == "Die")) {
 		OwnerComp.GetBlackboardComponent()->SetValueAsVector(AEnemyAIController::KeyTargetPosition, TargetPlayer->GetActorLocation());
 		return EBTNodeResult::Succeeded;
 	}

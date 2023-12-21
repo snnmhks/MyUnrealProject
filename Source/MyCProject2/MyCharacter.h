@@ -51,6 +51,7 @@ private:
 	FTimerHandle MRSkillTimerHandle;
 	FTimerHandle MRSkillChargeTimerHandle;
 	FTimerHandle RecoverMPTimerHandle;
+	FTimerHandle DieTimerHandle;
 
 	// 실시간으로 변하는 쿨타임 관련 변수들
 	UPROPERTY(VisibleAnywhere)
@@ -119,7 +120,7 @@ public:
 	UPROPERTY(VisibleAnywhere)
 		float AttackRange;
 	UPROPERTY(VisibleAnywhere)
-		FVector AttackBox;
+		FVector AttackBox; // (세로, 가로, 거리) 캐릭이 바라보고 있는 방향 기준
 	// 이 스트링 값으로 현재 캐릭터의 상태를 나타내고 여러 상태가 겹쳐서 발생하지 않도록 한다.
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly)
 		FString ActionState;
@@ -127,6 +128,13 @@ public:
 public:
 	// Sets default values for this character's properties
 	AMyCharacter();
+
+	// HP 조절 함수
+	UFUNCTION()
+		void DiffHP(float _HP);
+	// MP 조절 함수
+	UFUNCTION()
+		void DiffMP(float _MP);
 
 protected:
 	// Called when the game starts or when spawned
@@ -220,16 +228,13 @@ protected:
 	UFUNCTION()
 		void MRSkillChargeTime();
 
-	// HP 조절 함수
-	UFUNCTION()
-		void DiffHP(float _HP);
-	// MP 조절 함수
-	UFUNCTION()
-		void DiffMP(float _MP);
 	// HP 자연 회복 함수. timer를 사용하여 HP 조절함수를 지속적으로 호출한다.
 	UFUNCTION()
 		void NaturalRecoverHP();
 	// MP 자연 회복 함수. timer를 사용하여 MP 조절함수를 지속적으로 호출한다.
 	UFUNCTION()
 		void NaturalRecoverMP();
+	// 죽으면 n초뒤 호출할 함수
+	UFUNCTION()
+		void Diying();
 };

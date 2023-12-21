@@ -28,6 +28,7 @@ public:
 	FOnCheckDelegate OnDodgeAttackCheck;
 	FOnCheckDelegate OnNoChargeAttackCheck;
 	FOnCheckDelegate OnChargeAttackCheck;
+	FOnCheckDelegate OnDieCheck;
 
 	// 타격 유무를 감지하는 델리게이트
 	FOnCheckDelegate OnAttackAble;
@@ -55,6 +56,10 @@ public:
 	// 헤비 어택 몽타주
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = Action, Meta = (AllowPrivateAccess = true))
 		UAnimMontage* HeavyMontage;
+
+	// 죽는 몽타주
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = Action, Meta = (AllowPrivateAccess = true))
+		UAnimMontage* DieMontage;
 public:
 	// 몽타주 재생 함수
 	UFUNCTION()
@@ -110,4 +115,6 @@ private:
 		void AnimNotify_ChargeCheck();
 	UFUNCTION()
 		void AnimNotify_PlayEffect();
+	UFUNCTION()
+		void AnimNotify_DieCheck();
 };

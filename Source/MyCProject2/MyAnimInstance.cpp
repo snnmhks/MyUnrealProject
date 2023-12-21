@@ -28,6 +28,11 @@ UMyAnimInstance::UMyAnimInstance() {
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> HEAVY_MONTAGE(
 		TEXT("AnimMontage'/Game/InfinityBladeWarriors/Character/CompleteCharacters/Mongtage/HeavyAttack.HeavyAttack'"));
 	if (HEAVY_MONTAGE.Succeeded()) HeavyMontage = HEAVY_MONTAGE.Object;
+
+	// 磷绰 根鸥林 积己
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> DIE_MONTAGE(
+		TEXT("AnimMontage'/Game/InfinityBladeWarriors/Character/CompleteCharacters/Mongtage/Die.Die'"));
+	if (DIE_MONTAGE.Succeeded()) DieMontage = DIE_MONTAGE.Object;
 }
 
 void UMyAnimInstance::NativeBeginPlay()
@@ -44,6 +49,7 @@ void UMyAnimInstance::PlayMongtage(FString Name, float PlaySpeed) {
 	else if (Name == "Dodge") Montage_Play(DodgeMontage, PlaySpeed);
 	else if (Name == "Jump") Montage_Play(JumpMontage, PlaySpeed);
 	else if (Name == "Heavy") Montage_Play(HeavyMontage, PlaySpeed);
+	else if (Name == "Die") Montage_Play(DieMontage, PlaySpeed);
 }
 
 void UMyAnimInstance::StopMontage(FString Name) {
@@ -107,6 +113,10 @@ void UMyAnimInstance::AnimNotify_HeavyAttackDisable() {
 
 void UMyAnimInstance::AnimNotify_PlayEffect() {
 	OnPlayEffect.Broadcast();
+}
+
+void UMyAnimInstance::AnimNotify_DieCheck() {
+	OnDieCheck.Broadcast();
 }
 
 // 根鸥林 冀记 逞扁扁
