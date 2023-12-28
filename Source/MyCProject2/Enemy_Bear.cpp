@@ -51,4 +51,5 @@ void AEnemy_Bear::BeginPlay() {
 	EnemyCurrentHP = 100;
 	EnemyMaxHP = 100;
 	EnemyDamage = 10;
+	EnemyGold = 10;
 }

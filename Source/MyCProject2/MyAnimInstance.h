@@ -39,19 +39,19 @@ public:
 
 	// 痢橇 根鸥林
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = Action, Meta = (AllowPrivateAccess = true))
-		UAnimMontage* JumpMontage;
+		class UAnimMontage* JumpMontage;
 
 	// 霓焊 傍拜 根鸥林
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = Action, Meta = (AllowPrivateAccess = true))
-		UAnimMontage* ComboMontage;
+		class UAnimMontage* ComboMontage;
 
 	// 胶橇赴飘 傍拜 根鸥林
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = Action, Meta = (AllowPrivateAccess = true))
-		UAnimMontage* SprintMontage;
+		class UAnimMontage* SprintMontage;
 
 	// 村瘤 根鸥林
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = Action, Meta = (AllowPrivateAccess = true))
-		UAnimMontage* DodgeMontage;
+		class UAnimMontage* DodgeMontage;
 
 	// 庆厚 绢琶 根鸥林
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = Action, Meta = (AllowPrivateAccess = true))
@@ -59,7 +59,7 @@ public:
 
 	// 磷绰 根鸥林
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = Action, Meta = (AllowPrivateAccess = true))
-		UAnimMontage* DieMontage;
+		class UAnimMontage* DieMontage;
 public:
 	// 根鸥林 犁积 窃荐
 	UFUNCTION()

@@ -12,7 +12,7 @@ AMyLevelScript::AMyLevelScript() {
 
 void AMyLevelScript::BeginPlay() {
 	Super::BeginPlay();
-
+	return;
 	float Percent = 0.5f;
 	int SpawnNum = 0;
 	// 랜덤 위치에 적을 소환

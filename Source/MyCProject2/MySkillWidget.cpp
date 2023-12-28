@@ -3,11 +3,24 @@
 #include "MySkillWidget.h"
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
+#include "Components/EditableTextBox.h"
 #include "Components/PanelWidget.h"
 #include "Components/CanvasPanelSlot.h"
 #include "Fonts/SlateFontInfo.h"
+#include "Components/UniformGridPanel.h"
+#include "InventoryIconWidget.h"
 
 #define LOCTEXT_NAMESPACE "MyNameSpace"
+
+void UMySkillWidget::NativeOnInitialized() {
+	Super::NativeOnInitialized();
+
+	for (UWidget* ItemSlot : QuickSlotPanel->GetAllChildren()) {
+		UInventoryIconWidget* tmp = Cast<UInventoryIconWidget>(ItemSlot);
+		//tmp->ParentInventory = this;
+		tmp->Type = ESlotType::SLOT_Quick;
+	}
+}
 
 void UMySkillWidget::ChargeBarActivate(FString Name) {
 	ChargeBar->SetPercent(0.f);
@@ -62,4 +75,23 @@ void UMySkillWidget::IconSizeUp(FString Name) {
 		Cast<UCanvasPanelSlot>(MRSkill->Slot.Get())->SetSize(FVector2D(80, 80));
 		//MRText->Font.Size = 35;
 	}
+}
+
+bool UMySkillWidget::UsingItem(FName _ItemName) {
+	for (UWidget* ItemSlot : QuickSlotPanel->GetAllChildren()) {
+		UInventoryIconWidget* tmp = Cast<UInventoryIconWidget>(ItemSlot);
+		if (tmp->ItemName == _ItemName) {
+			tmp->UsingItem();
+			return true;
+		}
+	}
+	return false;
+}
+
+FName UMySkillWidget::GetQuickSlotItemName(int _Index) {
+	UInventoryIconWidget* tmp = Cast<UInventoryIconWidget>(QuickSlotPanel->GetChildAt(_Index));
+	if (tmp->IsInItem) {
+		return tmp->ItemName;
+	}
+	return EName::None;
 }

@@ -21,6 +21,10 @@ public:
 	UPROPERTY(meta = (BindWidget))
 		class UTextBlock* ChargeBarText;
 
+	// 인벤 아이콘을 담은 판넬
+	UPROPERTY(meta = (BindWidget))
+		class UUniformGridPanel* QuickSlotPanel;
+
 	// 각 스킬의 아이콘
 	UPROPERTY(meta = (BindWidget))
 		class UProgressBar* QSkill;
@@ -64,4 +68,10 @@ public:
 		void MLActivate();
 	UFUNCTION()
 		void MLDisable();
+
+	bool UsingItem(FName _ItemName);
+	FName GetQuickSlotItemName(int _Index);
+
+protected:
+	virtual void NativeOnInitialized() override;
 };

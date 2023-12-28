@@ -73,16 +73,6 @@ private:
 	UPROPERTY(VisibleAnywhere)
 		float CurrentMP;
 
-	// 업그레이드 변수들
-	UPROPERTY(VisibleAnywhere)
-		float AttackSpeed;
-	UPROPERTY(VisibleAnywhere)
-		float CoolTimeDown;
-	UPROPERTY(VisibleAnywhere)
-		float BaseDamage;
-	UPROPERTY(VisibleAnywhere)
-		float BaseGuard;
-
 public:
 	// 데이터 테이블에서 가져온 변수를 저장할 맵
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly)
@@ -125,6 +115,18 @@ public:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly)
 		FString ActionState;
 
+	// 업그레이드 변수들
+	UPROPERTY(VisibleAnywhere)
+		float AttackSpeed;
+	UPROPERTY(VisibleAnywhere)
+		float CoolTimeDown;
+	UPROPERTY(VisibleAnywhere)
+		float BaseDamage;
+	UPROPERTY(VisibleAnywhere)
+		float BaseGuard;
+	UPROPERTY(VisibleAnywhere)
+		float UserGold;
+
 public:
 	// Sets default values for this character's properties
 	AMyCharacter();
@@ -135,6 +137,12 @@ public:
 	// MP 조절 함수
 	UFUNCTION()
 		void DiffMP(float _MP);
+	// 골드 조절 함수
+	UFUNCTION()
+		void GoldDiff(int _Gold);
+	// 아이템 추가 함수
+	UFUNCTION()
+		bool GetItem(class UItemData* _Item);
 
 protected:
 	// Called when the game starts or when spawned
@@ -149,9 +157,15 @@ public:
 
 private:
 	// 스킬 창에 대한 UI를 받아오는 변수
-	TSubclassOf<class UUserWidget> UI_SkillClass;
 	UPROPERTY(VisibleAnywhere, Category = UI)
 		class UMySkillWidget* UI_Skill;
+	// 인벤토리 창에 대한 UI를 받아오는 변수
+	UPROPERTY(VisibleAnywhere, Category = UI)
+		class UInventoryWidget* UI_Inventory;
+	// 메인 HUD 창에 대한 UI를 받아오는 변수
+	TSubclassOf<class UUserWidget> UI_MainHUDClass;
+	UPROPERTY(VisibleAnywhere, Category = UI)
+		class UMainHUDWidget* UI_MainHUD;
 
 	// IMC 변수 설정
 	UPROPERTY(VisibleAnywhere, Category = Input)
@@ -183,6 +197,12 @@ private:
 	// Heavy Attack 변수 설정
 	UPROPERTY(VisibleAnywhere, Category = Input)
 		class UInputAction* IA_HeavyAttack;
+	// Inventory 변수 설정
+	UPROPERTY(VisibleAnywhere, Category = Input)
+		class UInputAction* IA_Inventory;
+	// Quick Slot 변수 설정
+	UPROPERTY(VisibleAnywhere, Category = Input)
+		class UInputAction* IA_Quick;
 
 	// Weapon 변수 설정
 	UPROPERTY(VisibleAnywhere, Category = Weapon)
@@ -209,6 +229,10 @@ protected:
 	void Dodge(const FInputActionValue& Value);
 	void HeavyAttack(const FInputActionValue& Value);
 	void HeavyEnd(const FInputActionValue& Value);
+	// 인벤토리에 대한 IA
+	void InventoryOnOff(const FInputActionValue& Value);
+	// 퀵 슬롯에 대한 IA
+	void UsingQuickSlot(const FInputActionValue& Value);
 	// 공격이 끝나면 실행되는 함수 -> 엔진과 상호작용을 해서 UFUNCTION을 붙여줘야함
 	UFUNCTION()
 		void AttackEnded(UAnimMontage* Montage, bool bInterrupted);
@@ -237,4 +261,5 @@ protected:
 	// 죽으면 n초뒤 호출할 함수
 	UFUNCTION()
 		void Diying();
+
 };

@@ -29,7 +29,7 @@ public:
 
 	// 지금 재생중인 몽타주
 	UPROPERTY(VisibleAnywhere)
-		UAnimMontage* CurrentMongtage;
+		class UAnimMontage* CurrentMongtage;
 
 public:
 	UEnemyAnimInstance();

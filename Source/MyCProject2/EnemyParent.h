@@ -19,9 +19,6 @@ private:
 	// 체력바 뒤쪽까지 보여주기
 	UPROPERTY(VisibleAnywhere)
 		class UWidgetComponent* EWidget2;
-	// 죽는 모션 중인가
-	UPROPERTY(VisibleAnywhere)
-		bool IsDying;
 
 private:
 
@@ -42,18 +39,26 @@ public:
 		float EnemyCurrentHP;
 	UPROPERTY(VisibleAnywhere)
 		float EnemyDamage;
+	UPROPERTY(VisibleAnywhere)
+		int EnemyGold;
+
+	// 죽는 모션 중인가
+	UPROPERTY(VisibleAnywhere)
+		bool IsDying;
 
 	// 죽는 몽타주
 	UPROPERTY(VisibleAnywhere)
 		class UAnimMontage* DieMongtage;
-
 	// 소환 몽타주
 	UPROPERTY(VisibleAnywhere)
-		UAnimMontage* SpawnMontage;
-
+		class UAnimMontage* SpawnMontage;
 	// 공격 몽타주
 	UPROPERTY(VisibleAnywhere)
-		UAnimMontage* AttackMontage1;
+		class UAnimMontage* AttackMontage1;
+
+	// 아이템 정보
+	UPROPERTY(VisibleAnywhere)
+		class UItemData* ItemData;
 
 public:
 	// Sets default values for this pawn's properties
@@ -73,5 +78,9 @@ public:
 	// 데미지를 받으면 호출할 함수
 	void OnDamaged(float _Damage);
 
+	// 데미지를 주면 호출할 함수
 	float EnemyAttack();
+
+	// 데미지를 주면 호출할 함수
+	void SetItemData();
 };

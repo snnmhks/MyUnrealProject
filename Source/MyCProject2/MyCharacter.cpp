@@ -5,7 +5,10 @@
 #include "MyWeapon.h"
 #include "MyPlayerController.h"
 #include "MySkillWidget.h"
+#include "MainHUDWidget.h"
+#include "InventoryWidget.h"
 #include "SkillDataStruct.h"
+#include "ItemData.h"
 #include "CharacterStateStruct.h"
 #include "GameFramework/SpringArmComponent.h"//SpringArm 사용하기 위해
 #include "Camera/CameraComponent.h"//Camera 사용하기 위해
@@ -19,6 +22,7 @@
 #include "Engine/DataTable.h" // 데이터 테이블 사용
 #include "Components/ProgressBar.h" // ProgressBar 사용
 #include "EnemyParent.h"
+
 
 // Sets default values
 AMyCharacter::AMyCharacter()
@@ -57,7 +61,7 @@ AMyCharacter::AMyCharacter()
 	// 업그레이드 변수
 	AttackSpeed = 1.0f;
 	CoolTimeDown = 1.0f;
-	BaseDamage = 0.0f;
+	BaseDamage = 100.0f;
 	BaseGuard = 0.0f;
 	////////////////////////////////
 
@@ -95,25 +99,25 @@ AMyCharacter::AMyCharacter()
 
 	// 스킬 데이터 테이블 생성
 	static ConstructorHelpers::FObjectFinder<UDataTable> SKILL_DATA_TABLE(
-		TEXT("/Script/Engine.DataTable'/Game/DataTable/SkillDataTable'"));
+		TEXT("DataTable'/Game/DataTable/SkillDataTable'"));
 	if (SKILL_DATA_TABLE.Succeeded()) {
 		SkillDataTable = SKILL_DATA_TABLE.Object;
 	}
 
 	// 캐릭터 상태 변수 데이터 테이블 생성
 	static ConstructorHelpers::FObjectFinder<UDataTable> CHARACTER_STATE_TABLE(
-		TEXT("/Script/Engine.DataTable'/Game/DataTable/CharacterStateTable'"));
+		TEXT("DataTable'/Game/DataTable/CharacterStateTable'"));
 	if (CHARACTER_STATE_TABLE.Succeeded()) {
 		CharacterStateTable = CHARACTER_STATE_TABLE.Object;
 	}
 
 	// UI 생성
-	static ConstructorHelpers::FClassFinder<UMySkillWidget> UI_SKILLWIDGET(
-		TEXT("WidgetBlueprint'/Game/UI/UI_SkillWidget'"));
-	if (UI_SKILLWIDGET.Succeeded()) {
-		UI_SkillClass = UI_SKILLWIDGET.Class;
+	static ConstructorHelpers::FClassFinder<UMainHUDWidget> UI_MAINHUD(
+		TEXT("WidgetBlueprint'/Game/UI/UI_MainHUD'"));
+	if (UI_MAINHUD.Succeeded()) {
+		UI_MainHUDClass = UI_MAINHUD.Class;
 	}
-	
+
 	// 무기 생성
 	static ConstructorHelpers::FClassFinder<AMyWeapon> MY_WEAPON(
 		TEXT("Class'/Script/MyCProject2.MyWeapon'"));
@@ -174,6 +178,16 @@ AMyCharacter::AMyCharacter()
 	static ConstructorHelpers::FObjectFinder<UInputAction>IA_HEAVY
 	(TEXT("InputAction'/Game/Input/IA/IA_Heavy.IA_Heavy'"));
 	if (IA_HEAVY.Succeeded()) IA_HeavyAttack = IA_HEAVY.Object;
+
+	// IA Inventory 생성
+	static ConstructorHelpers::FObjectFinder<UInputAction>IA_INVENTORY
+	(TEXT("InputAction'/Game/Input/IA/IA_Inventory.IA_Inventory'"));
+	if (IA_INVENTORY.Succeeded()) IA_Inventory = IA_INVENTORY.Object;
+
+	// IA Quick 생성
+	static ConstructorHelpers::FObjectFinder<UInputAction>IA_QUICK
+	(TEXT("InputAction'/Game/Input/IA/IA_Quick.IA_Quick'"));
+	if (IA_QUICK.Succeeded()) IA_Quick = IA_QUICK.Object;
 }
 
 void AMyCharacter::SetSkillValue() {
@@ -252,9 +266,11 @@ void AMyCharacter::BeginPlay()
 	SetCharacterStateValue();
 
 	// UI 화면에 추가
-	if (IsValid(UI_SkillClass)) {
-		UI_Skill = Cast<UMySkillWidget>(CreateWidget(GetWorld(), UI_SkillClass));
-		UI_Skill->AddToViewport();
+	if (IsValid(UI_MainHUDClass)) {
+		UI_MainHUD = Cast<UMainHUDWidget>(CreateWidget(GetWorld(), UI_MainHUDClass));
+		UI_MainHUD->AddToViewport();
+		UI_Skill = UI_MainHUD->UI_SkillWidget;
+		UI_Inventory = UI_MainHUD->UI_Inventory;
 	}
 
 	// 무기 매쉬 생성 
@@ -370,7 +386,7 @@ void AMyCharacter::BeginPlay()
 			TArray<FString> BeforeName;
 			for (FHitResult SweepActor: HitResult) { // HitResult의 모든 원소에 대해 루프 진행, 범위 기반 루프
 				AEnemyParent* SweepEnemy = Cast<AEnemyParent>(SweepActor.GetActor());
-				if (SweepEnemy && !BeforeName.Contains(SweepEnemy->GetName())) {
+				if (SweepEnemy && !BeforeName.Contains(SweepEnemy->GetName()) && SweepEnemy->IsDying == 0) {
 					BeforeName.Add(SweepEnemy->GetName());
 					Weapon->PlayEffect("Hit", SweepActor.ImpactPoint);
 					SweepEnemy->OnDamaged(DamageValue);
@@ -449,6 +465,8 @@ void AMyCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 		EnhancedInputComponent->BindAction(IA_DodgeAttack, ETriggerEvent::Started, this, &AMyCharacter::Dodge);
 		EnhancedInputComponent->BindAction(IA_HeavyAttack, ETriggerEvent::Triggered, this, &AMyCharacter::HeavyAttack);
 		EnhancedInputComponent->BindAction(IA_HeavyAttack, ETriggerEvent::Completed, this, &AMyCharacter::HeavyEnd);
+		EnhancedInputComponent->BindAction(IA_Inventory, ETriggerEvent::Started, this, &AMyCharacter::InventoryOnOff);
+		EnhancedInputComponent->BindAction(IA_Quick, ETriggerEvent::Started, this, &AMyCharacter::UsingQuickSlot);
 	}
 
 }
@@ -504,7 +522,11 @@ void AMyCharacter::JumpAction(const FInputActionValue& Value) {
 	Jump();// 점프는 언리얼에서 함수를 구현해 놨다.
 }
 
-
+// 퀵 슬롯
+void AMyCharacter::UsingQuickSlot(const FInputActionValue& Value) {
+	int tmp = Value.Get<float>();
+	UI_MainHUD->UsingItem(UI_Skill->GetQuickSlotItemName(tmp - 1));
+}
 
 
 
@@ -582,7 +604,19 @@ void AMyCharacter::NaturalRecoverMP() {
 }
 
 
-
+// 인벤토리 IA
+void AMyCharacter::InventoryOnOff(const FInputActionValue& Value) {
+	if (UI_Inventory->GetVisibility() == ESlateVisibility::Visible) {
+		UI_Inventory->SetVisibility(ESlateVisibility::Hidden);
+		MyController->SetShowMouseCursor(false);
+		MyController->SetInputMode(FInputModeGameOnly());
+	}
+	else {
+		UI_Inventory->SetVisibility(ESlateVisibility::Visible);
+		MyController->SetShowMouseCursor(true);
+		MyController->SetInputMode(FInputModeGameAndUI());
+	}
+}
 
 
 // 공격 IA
@@ -752,6 +786,14 @@ void AMyCharacter::MRSkillChargeTime() {
 
 void AMyCharacter::Diying() {
 	GetWorldTimerManager().ClearTimer(DieTimerHandle);
-	UE_LOG(LogTemp, Log, TEXT("Hello"));
 	Destroy();
+}
+
+void AMyCharacter::GoldDiff(int _Gold) {
+	UserGold += _Gold;
+	UI_Inventory->SetGoldValue(UserGold);
+}
+
+bool AMyCharacter::GetItem(UItemData* _Item) {
+	return UI_Inventory->AddItemToInventory(_Item);
 }

@@ -5,9 +5,10 @@
 #include "EnemyAnimInstance.h"
 #include "EnemyAIController.h"
 #include "EnemyWidget.h"
-#include "MyWeapon.h"
+#include "ItemData.h"
 #include "MyCharacter.h"
 #include "Components/WidgetComponent.h"
+#include "Math/UnrealMathUtility.h"
 #include "Kismet/GameplayStatics.h" // GetPlayerController 사용
 
 // Sets default values
@@ -39,7 +40,7 @@ AEnemyParent::AEnemyParent()
 	EWidget->SetCollisionProfileName("NoCollision");
 	EWidget2->SetCollisionProfileName("NoCollision");
 	EWidget2->SetRelativeRotation(FRotator(0.0f, 180.0f, 0.0f));
-	// 다른 컴포넌트들과 다르게 SetUpAttachment만 있다 -> RootComponent에 붙인다.
+	// 다른 컴포넌트들과 다르게 SetUpAttachment만 있다. -> RootComponent에 붙인다.
 	EWidget->SetupAttachment(RootComponent);
 	EWidget2->SetupAttachment(RootComponent);
 }
@@ -63,7 +64,7 @@ void AEnemyParent::BeginPlay()
 
 		// 스폰 몽타주가 끝나면 비헤비어 트리를 작동한다.
 		EnemyAnim->SpawnCheck.AddLambda([this]()->void {
-			Cast<AEnemyAIController>(GetController())->RunBT();
+			//Cast<AEnemyAIController>(GetController())->RunBT();
 		});
 
 		// 공격 타이밍에 맞춰 sweep trace를 실행
@@ -132,6 +133,13 @@ void AEnemyParent::OnDamaged(float _Damage) {
 		IsDying = true;
 		EnemyCurrentHP = 0;
 		if (DieMongtage && EnemyAnim) {
+			TargetPlayer->GoldDiff(EnemyGold);
+			// 죽을 때 선물할 아이템 데이터를 생성해 놓는다.
+			ItemData = NewObject<UItemData>();
+			SetItemData();
+			if (TargetPlayer->GetItem(ItemData)) {
+
+			}
 			Cast<AEnemyAIController>(GetController())->StopBT();
 			EnemyAnim->StopCurrentMongtage();
 			EnemyAnim->PlayMongtage(DieMongtage);
@@ -143,4 +151,14 @@ void AEnemyParent::OnDamaged(float _Damage) {
 
 float AEnemyParent::EnemyAttack() {
 	return EnemyAnim->PlayMongtage(AttackMontage1);
+}
+
+void AEnemyParent::SetItemData() {
+	float tmp = 0.5f;
+	if (tmp > FMath::RandRange(0, 1)) {
+		ItemData->SetItemData(FName(TEXT("HPPortion")));
+	}
+	else {
+		ItemData->SetItemData(FName(TEXT("MPPortion")));
+	}
 }
