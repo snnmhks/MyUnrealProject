@@ -20,7 +20,7 @@ void UInventoryWidget::NativeOnInitialized() {
 
 	CurrentIndex = 0;
 	CanvasSlot = Cast<UCanvasPanelSlot>(InventoryCanvas->Slot);
-	
+
 	for (UWidget* ItemSlot : InventoryPanel->GetAllChildren()) {
 		UInventoryIconWidget* tmp = Cast<UInventoryIconWidget>(ItemSlot);
 		tmp->ParentInventory = this;
@@ -62,9 +62,14 @@ bool UInventoryWidget::AddItemToInventory(UItemData* _Item) {
 		CheckItemList.FindRef(_Item->ItemName)->ItemNumPlus();
 	}
 	else {
-		CheckItemList.Add(_Item->ItemName, Cast<UInventoryIconWidget>(InventoryPanel->GetChildAt(CurrentIndex)));
-		CheckItemList.FindRef(_Item->ItemName)->SetItemData(_Item);
-		CurrentIndex++;
+		for (UWidget* ItemSlot : InventoryPanel->GetAllChildren()) {
+			UInventoryIconWidget* tmp = Cast<UInventoryIconWidget>(ItemSlot);
+			if (tmp->HaveItem->IsInItem == 0) {
+				CheckItemList.Add(_Item->ItemName, tmp);
+				CheckItemList.FindRef(_Item->ItemName)->SetItemData(_Item);
+				break;
+			}
+		}
 	}
 
 	return true;

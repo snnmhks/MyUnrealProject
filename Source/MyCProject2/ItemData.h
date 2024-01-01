@@ -26,12 +26,19 @@ public:
 	UItemData();
 
 	UPROPERTY(VisibleAnywhere)
+		bool IsInItem;
+	UPROPERTY(VisibleAnywhere)
 		class UTexture2D* ItemImage;
 	UPROPERTY(VisibleAnywhere)
 		FName ItemName;
 	UPROPERTY(VisibleAnywhere)
+		int ItemNum;
+	UPROPERTY(VisibleAnywhere)
 		class UDataTable* ItemDataTable;
+	UPROPERTY(VisibleAnywhere, BluePrintReadWrite)
+		TEnumAsByte<enum EItemType> Type;
 
 public:
 	void SetItemData(FName _ItemName);
+	void SetItemData(UItemData* _Item);
 };

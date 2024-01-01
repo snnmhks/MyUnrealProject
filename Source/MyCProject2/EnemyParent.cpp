@@ -4,11 +4,14 @@
 #include "EnemyParent.h"
 #include "EnemyAnimInstance.h"
 #include "EnemyAIController.h"
+#include "MyLevelScript.h"
 #include "EnemyWidget.h"
 #include "ItemData.h"
 #include "MyCharacter.h"
+#include "Components/CapsuleComponent.h"//CapsuleComponent 사용하기 위해
 #include "Components/WidgetComponent.h"
 #include "Math/UnrealMathUtility.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "Kismet/GameplayStatics.h" // GetPlayerController 사용
 
 // Sets default values
@@ -19,7 +22,7 @@ AEnemyParent::AEnemyParent()
 
 	// 매쉬의 각종 정보 설정
 	GetMesh()->SetAnimationMode(EAnimationMode::AnimationBlueprint);
-	GetMesh()->SetGenerateOverlapEvents(true);
+	GetMesh()->SetGenerateOverlapEvents(false);
 	GetMesh()->SetNotifyRigidBodyCollision(false);
 	GetMesh()->SetCollisionProfileName("EnemyMesh");
 	AIControllerClass = AEnemyAIController::StaticClass();
@@ -34,15 +37,10 @@ AEnemyParent::AEnemyParent()
 
 	// Component 생성
 	EWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("EWidget"));
-	EWidget2 = CreateDefaultSubobject<UWidgetComponent>(TEXT("EWidget2"));
 	EWidget->SetWidgetClass(UI_EnemyClass);
-	EWidget2->SetWidgetClass(UI_EnemyClass);
 	EWidget->SetCollisionProfileName("NoCollision");
-	EWidget2->SetCollisionProfileName("NoCollision");
-	EWidget2->SetRelativeRotation(FRotator(0.0f, 180.0f, 0.0f));
 	// 다른 컴포넌트들과 다르게 SetUpAttachment만 있다. -> RootComponent에 붙인다.
 	EWidget->SetupAttachment(RootComponent);
-	EWidget2->SetupAttachment(RootComponent);
 }
 
 // Called when the game starts or when spawned
@@ -64,7 +62,7 @@ void AEnemyParent::BeginPlay()
 
 		// 스폰 몽타주가 끝나면 비헤비어 트리를 작동한다.
 		EnemyAnim->SpawnCheck.AddLambda([this]()->void {
-			//Cast<AEnemyAIController>(GetController())->RunBT();
+			Cast<AEnemyAIController>(GetController())->RunBT();
 		});
 
 		// 공격 타이밍에 맞춰 sweep trace를 실행
@@ -117,6 +115,9 @@ void AEnemyParent::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	FRotator TargetRotation = TargetPlayer->GetActorRotation();
+	EWidget->SetWorldRotation(TargetRotation + FRotator(0.0f, 180.0f, 0.0f));
+
 }
 
 // Called to bind functionality to input
@@ -134,7 +135,9 @@ void AEnemyParent::OnDamaged(float _Damage) {
 		EnemyCurrentHP = 0;
 		if (DieMongtage && EnemyAnim) {
 			TargetPlayer->GoldDiff(EnemyGold);
+			GetCapsuleComponent()->SetCollisionProfileName("NoCollision");
 			// 죽을 때 선물할 아이템 데이터를 생성해 놓는다.
+			Cast<AMyLevelScript>(GetWorld()->GetLevelScriptActor())->KilledEnemy();
 			ItemData = NewObject<UItemData>();
 			SetItemData();
 			if (TargetPlayer->GetItem(ItemData)) {
@@ -146,7 +149,6 @@ void AEnemyParent::OnDamaged(float _Damage) {
 		}
 	}
 	Cast<UEnemyWidget>(EWidget->GetWidget())->SetHPBarPercent(EnemyCurrentHP, EnemyMaxHP);
-	Cast<UEnemyWidget>(EWidget2->GetWidget())->SetHPBarPercent(EnemyCurrentHP, EnemyMaxHP);
 }
 
 float AEnemyParent::EnemyAttack() {

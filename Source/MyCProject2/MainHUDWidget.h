@@ -15,6 +15,9 @@ class MYCPROJECT2_API UMainHUDWidget : public UUserWidget
 	GENERATED_BODY()
 	
 public:
+	// 가장 앞에 있는 UI
+	int MaxZorder;
+	TArray<class UUserWidget*> UI_Front;
 	// 스킬 화면
 	UPROPERTY(meta = (BindWidget))
 		class UMySkillWidget* UI_SkillWidget;
@@ -23,5 +26,12 @@ public:
 		class UInventoryWidget* UI_Inventory;
 
 public:
-	void UsingItem(FName _ItemName);
+	void UsingItemQuickSlot(FName _ItemName);
+	void UsingItemInventory(FName _ItemName);
+	bool CloseFrontUI();
+	void AddToFrontUI(class UUserWidget* _AddWidget);
+	void RemoveByFrontUI(class UUserWidget* _AddWidget);
+
+protected:
+	virtual void NativeOnInitialized() override;
 };

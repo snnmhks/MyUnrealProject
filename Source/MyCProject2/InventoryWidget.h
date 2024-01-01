@@ -15,6 +15,9 @@ class MYCPROJECT2_API UInventoryWidget : public UUserWidget
 	GENERATED_BODY()
 	
 public:
+	// 부모 위젯
+	UPROPERTY()
+		class UMainHUDWidget* ParentWidget;
 	// UI를 움직이기 위한 윗부분 버튼
 	UPROPERTY(meta = (BindWidget))
 		class UButton* InventoryHeader;
@@ -32,8 +35,7 @@ public:
 		class UUniformGridPanel* InventoryPanel;
 
 	// 캐릭터가 가진 아이템
-	UPROPERTY(VisibleAnywhere)
-		TMap<FName, class UInventoryIconWidget*> CheckItemList;
+	TMap<FName, class UInventoryIconWidget*> CheckItemList;
 
 	// UI를 움직일 때 필요한 변수들
 	class UCanvasPanelSlot* CanvasSlot;

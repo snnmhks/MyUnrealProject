@@ -15,6 +15,9 @@ class MYCPROJECT2_API UMySkillWidget : public UUserWidget
 	GENERATED_BODY()
 
 public:
+	// 부모 위젯
+	UPROPERTY()
+		class UMainHUDWidget* ParentWidget;
 	// 차지를 할 때 가시성을 위해 표시할 차지바
 	UPROPERTY(meta = (BindWidget))
 		class UProgressBar* ChargeBar;
@@ -70,7 +73,7 @@ public:
 		void MLDisable();
 
 	bool UsingItem(FName _ItemName);
-	FName GetQuickSlotItemName(int _Index);
+	FName UsingItem(int _Index);
 
 protected:
 	virtual void NativeOnInitialized() override;

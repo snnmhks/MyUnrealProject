@@ -19,4 +19,6 @@ struct FItemDataStructure : public FTableRowBase
 		class UTexture2D* ItemImage;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		FName ItemName;
+	UPROPERTY(EditAnywhere, BluePrintReadWrite)
+		TEnumAsByte<enum EItemType> Type;
 };

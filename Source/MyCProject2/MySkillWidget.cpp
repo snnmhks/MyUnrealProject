@@ -9,6 +9,7 @@
 #include "Fonts/SlateFontInfo.h"
 #include "Components/UniformGridPanel.h"
 #include "InventoryIconWidget.h"
+#include "ItemData.h"
 
 #define LOCTEXT_NAMESPACE "MyNameSpace"
 
@@ -17,7 +18,7 @@ void UMySkillWidget::NativeOnInitialized() {
 
 	for (UWidget* ItemSlot : QuickSlotPanel->GetAllChildren()) {
 		UInventoryIconWidget* tmp = Cast<UInventoryIconWidget>(ItemSlot);
-		//tmp->ParentInventory = this;
+		tmp->ParentSkill = this;
 		tmp->Type = ESlotType::SLOT_Quick;
 	}
 }
@@ -80,7 +81,7 @@ void UMySkillWidget::IconSizeUp(FString Name) {
 bool UMySkillWidget::UsingItem(FName _ItemName) {
 	for (UWidget* ItemSlot : QuickSlotPanel->GetAllChildren()) {
 		UInventoryIconWidget* tmp = Cast<UInventoryIconWidget>(ItemSlot);
-		if (tmp->ItemName == _ItemName) {
+		if (tmp->HaveItem->ItemName == _ItemName) {
 			tmp->UsingItem();
 			return true;
 		}
@@ -88,10 +89,12 @@ bool UMySkillWidget::UsingItem(FName _ItemName) {
 	return false;
 }
 
-FName UMySkillWidget::GetQuickSlotItemName(int _Index) {
+FName UMySkillWidget::UsingItem(int _Index) {
 	UInventoryIconWidget* tmp = Cast<UInventoryIconWidget>(QuickSlotPanel->GetChildAt(_Index));
-	if (tmp->IsInItem) {
-		return tmp->ItemName;
+	if (tmp->HaveItem->IsInItem) {
+		FName ReturnItemName = tmp->HaveItem->ItemName;
+		tmp->UsingItem();
+		return ReturnItemName;
 	}
 	return EName::None;
 }

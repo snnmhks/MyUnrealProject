@@ -203,6 +203,9 @@ private:
 	// Quick Slot 변수 설정
 	UPROPERTY(VisibleAnywhere, Category = Input)
 		class UInputAction* IA_Quick;
+	// Close UI 변수 설정
+	UPROPERTY(VisibleAnywhere, Category = Input)
+		class UInputAction* IA_CloseUI;
 
 	// Weapon 변수 설정
 	UPROPERTY(VisibleAnywhere, Category = Weapon)
@@ -233,6 +236,8 @@ protected:
 	void InventoryOnOff(const FInputActionValue& Value);
 	// 퀵 슬롯에 대한 IA
 	void UsingQuickSlot(const FInputActionValue& Value);
+	// UI닫는 키에 대한 IA
+	void CloseUI(const FInputActionValue& Value);
 	// 공격이 끝나면 실행되는 함수 -> 엔진과 상호작용을 해서 UFUNCTION을 붙여줘야함
 	UFUNCTION()
 		void AttackEnded(UAnimMontage* Montage, bool bInterrupted);

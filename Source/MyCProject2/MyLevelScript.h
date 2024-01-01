@@ -18,7 +18,21 @@ class MYCPROJECT2_API AMyLevelScript : public ALevelScriptActor
 	GENERATED_BODY()
 	
 public:
+	int KilledEnemyNum;
+	int GameLevel;
+	int MaxSpawnEnemyNum;
+
+	// 캐릭터 컨트롤러
+	UPROPERTY(VisibleAnywhere)
+		class AMyPlayerController* MyCharacterController;
+
+public:
 	AMyLevelScript();
 
+	void KilledEnemy();
+	void SpawnEnemy();
+	void EndShop();
+
+protected:
 	virtual void BeginPlay() override;
 };

@@ -188,6 +188,12 @@ AMyCharacter::AMyCharacter()
 	static ConstructorHelpers::FObjectFinder<UInputAction>IA_QUICK
 	(TEXT("InputAction'/Game/Input/IA/IA_Quick.IA_Quick'"));
 	if (IA_QUICK.Succeeded()) IA_Quick = IA_QUICK.Object;
+
+	// IA CloseUI »ý¼º
+	static ConstructorHelpers::FObjectFinder<UInputAction>IA_CLOSEUI
+	(TEXT("InputAction'/Game/Input/IA/IA_CloseUI.IA_CloseUI'"));
+	if (IA_CLOSEUI.Succeeded()) IA_CloseUI = IA_CLOSEUI.Object;
+
 }
 
 void AMyCharacter::SetSkillValue() {
@@ -467,6 +473,7 @@ void AMyCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 		EnhancedInputComponent->BindAction(IA_HeavyAttack, ETriggerEvent::Completed, this, &AMyCharacter::HeavyEnd);
 		EnhancedInputComponent->BindAction(IA_Inventory, ETriggerEvent::Started, this, &AMyCharacter::InventoryOnOff);
 		EnhancedInputComponent->BindAction(IA_Quick, ETriggerEvent::Started, this, &AMyCharacter::UsingQuickSlot);
+		EnhancedInputComponent->BindAction(IA_CloseUI, ETriggerEvent::Started, this, &AMyCharacter::CloseUI);
 	}
 
 }
@@ -525,9 +532,15 @@ void AMyCharacter::JumpAction(const FInputActionValue& Value) {
 // Äü ½½·Ô
 void AMyCharacter::UsingQuickSlot(const FInputActionValue& Value) {
 	int tmp = Value.Get<float>();
-	UI_MainHUD->UsingItem(UI_Skill->GetQuickSlotItemName(tmp - 1));
+	UI_Inventory->UsingItem(UI_Skill->UsingItem(tmp - 1));
 }
 
+void AMyCharacter::CloseUI(const FInputActionValue& Value) {
+	if (UI_MainHUD->CloseFrontUI()) {
+		MyController->SetShowMouseCursor(false);
+		MyController->SetInputMode(FInputModeGameOnly());
+	}
+}
 
 
 
@@ -607,11 +620,13 @@ void AMyCharacter::NaturalRecoverMP() {
 // ÀÎº¥Åä¸® IA
 void AMyCharacter::InventoryOnOff(const FInputActionValue& Value) {
 	if (UI_Inventory->GetVisibility() == ESlateVisibility::Visible) {
-		UI_Inventory->SetVisibility(ESlateVisibility::Hidden);
+		UI_MainHUD->RemoveByFrontUI(UI_Inventory);
+		UI_Inventory->SetVisibility(ESlateVisibility::Collapsed);
 		MyController->SetShowMouseCursor(false);
 		MyController->SetInputMode(FInputModeGameOnly());
 	}
 	else {
+		UI_MainHUD->AddToFrontUI(UI_Inventory);
 		UI_Inventory->SetVisibility(ESlateVisibility::Visible);
 		MyController->SetShowMouseCursor(true);
 		MyController->SetInputMode(FInputModeGameAndUI());

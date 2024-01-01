@@ -31,23 +31,18 @@ protected:
 	virtual void NativeOnInitialized() override;
 
 public:
-	// 부모 인벤토리
-	UPROPERTY()
-		class UInventoryWidget* ParentInventory;
+	class UItemData* HaveItem;
+	class UInventoryWidget* ParentInventory;
+	class UMySkillWidget* ParentSkill;
+	class AMyCharacter* OwnerPlayer;
 	// 아이콘 이미지
 	UPROPERTY(meta = (BindWidget))
 		class UImage* IconImage;
-	UPROPERTY()
-		class UTexture2D* ItemTexture;
 	// 아이템 갯수
 	UPROPERTY(meta = (BindWidget))
 		class UTextBlock* ItemNum;
 	UPROPERTY(VisibleAnywhere, BluePrintReadWrite)
 		TEnumAsByte<enum ESlotType> Type;
-
-	FName ItemName;
-	bool IsInItem;
-	int ItemNum1;
 
 public:
 

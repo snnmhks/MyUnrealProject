@@ -16,8 +16,19 @@ UItemData::UItemData() {
 
 void UItemData::SetItemData(FName _ItemName) {
 	FItemDataStructure* ItemDataStructures;
-	//ItemDataTable->FindRow<FItemDataStructure>(_ItemName, FString(""));
 	ItemDataStructures = ItemDataTable->FindRow<FItemDataStructure>(_ItemName, FString(""));
 	ItemImage = ItemDataStructures->ItemImage;
 	ItemName = ItemDataStructures->ItemName;
+	ItemNum = 1;
+	IsInItem = 1;
+	Type = ItemDataStructures->Type;
+	UE_LOG(LogTemp, Log, TEXT("%d"), ItemDataStructures->Type);
+}
+
+void UItemData::SetItemData(UItemData* _Item) {
+	ItemImage = _Item->ItemImage;
+	ItemName = _Item->ItemName;
+	ItemNum = _Item->ItemNum;
+	IsInItem = _Item->IsInItem;
+	Type = _Item->Type;
 }
