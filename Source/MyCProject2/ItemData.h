@@ -12,7 +12,7 @@
 
 UENUM()
 enum EItemType {
-	ITEM_None			UMETA(DisplayName = "None"),
+	ITEM_None = 0		UMETA(DisplayName = "None"),
 	ITEM_Useable		UMETA(DisplayName = "Useable"),
 	ITEM_Equipment		UMETA(DisplayName = "Equipment")
 };

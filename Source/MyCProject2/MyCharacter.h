@@ -238,6 +238,8 @@ protected:
 	void UsingQuickSlot(const FInputActionValue& Value);
 	// UI닫는 키에 대한 IA
 	void CloseUI(const FInputActionValue& Value);
+	// 인벤토리 클릭 키에 대한 IA
+	void InventoryClick(const FInputActionValue& Value);
 	// 공격이 끝나면 실행되는 함수 -> 엔진과 상호작용을 해서 UFUNCTION을 붙여줘야함
 	UFUNCTION()
 		void AttackEnded(UAnimMontage* Montage, bool bInterrupted);

@@ -99,7 +99,8 @@ void UInventoryIconWidget::NativeOnDragDetected(const FGeometry& InGeoMetry, con
 		UItemDrag* Oper = NewObject<UItemDrag>();
 		OutOperation = Oper;
 		Oper->DragItem = this;
-		Oper->DefaultDragVisual = this->IconImage; // 드래그 이미지가 OnDrop을 방해한다. 방법이 뭘까
+		Oper->DefaultDragVisual = this->IconImage; 
+		Oper->DefaultDragVisual->SetVisibility(ESlateVisibility::HitTestInvisible);
 	}
 }
 

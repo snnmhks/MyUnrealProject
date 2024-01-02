@@ -486,6 +486,10 @@ void AMyCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 
 // 바인딩 한 IA를 여기서 작업
 
+void AMyCharacter::InventoryClick(const FInputActionValue& Value) {
+	UE_LOG(LogTemp, Log, TEXT("Click"));
+}
+
 // 움직이는 IA
 void AMyCharacter::Move(const FInputActionValue& Value) {
 	if (ActionState != "Idle" && ActionState != "Jump") return;

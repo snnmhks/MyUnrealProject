@@ -18,7 +18,7 @@ AMyLevelScript::AMyLevelScript() {
 
 void AMyLevelScript::BeginPlay() {
 	Super::BeginPlay();
-	SpawnEnemy();
+	//SpawnEnemy();
 }
 
 void AMyLevelScript::SpawnEnemy() {

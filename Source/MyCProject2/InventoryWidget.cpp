@@ -11,6 +11,7 @@
 #include "Components/Image.h"
 #include "Components/UniformGridPanel.h"
 #include "InventoryIconWidget.h"
+#include "Blueprint/WidgetBlueprintLibrary.h"
 
 void UInventoryWidget::NativeOnInitialized() {
 	Super::NativeOnInitialized();
@@ -81,4 +82,12 @@ bool UInventoryWidget::UsingItem(FName _ItemName) {
 		return true;
 	}
 	return false;
+}
+
+FReply UInventoryWidget::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) {
+	FEventReply MyReply;
+	MyReply.NativeReply = Super::NativeOnMouseButtonDown(InGeometry, InMouseEvent);
+	MyReply = UWidgetBlueprintLibrary::DetectDragIfPressed(InMouseEvent, this, EKeys::AnyKey);
+	UE_LOG(LogTemp, Log, TEXT("Hello"));
+	return MyReply.NativeReply;
 }
