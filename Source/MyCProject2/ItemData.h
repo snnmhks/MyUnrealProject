@@ -10,13 +10,6 @@
  * 
  */
 
-UENUM()
-enum EItemType {
-	ITEM_None = 0		UMETA(DisplayName = "None"),
-	ITEM_Useable		UMETA(DisplayName = "Useable"),
-	ITEM_Equipment		UMETA(DisplayName = "Equipment")
-};
-
 UCLASS()
 class MYCPROJECT2_API UItemData : public UObject
 {

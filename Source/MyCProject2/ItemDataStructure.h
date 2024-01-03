@@ -10,6 +10,13 @@
  * 
  */
 
+UENUM(BlueprintType)
+enum EItemType {
+	ITEM_None = 0		UMETA(DisplayName = "None"),
+	ITEM_Useable		UMETA(DisplayName = "Useable"),
+	ITEM_Equipment		UMETA(DisplayName = "Equipment")
+};
+
 USTRUCT(BlueprintType)
 struct FItemDataStructure : public FTableRowBase
 {

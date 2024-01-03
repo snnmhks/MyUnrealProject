@@ -22,7 +22,6 @@ void UItemData::SetItemData(FName _ItemName) {
 	ItemNum = 1;
 	IsInItem = 1;
 	Type = ItemDataStructures->Type;
-	UE_LOG(LogTemp, Log, TEXT("%d"), ItemDataStructures->Type);
 }
 
 void UItemData::SetItemData(UItemData* _Item) {

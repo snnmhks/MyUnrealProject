@@ -87,7 +87,12 @@ bool UInventoryWidget::UsingItem(FName _ItemName) {
 FReply UInventoryWidget::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) {
 	FEventReply MyReply;
 	MyReply.NativeReply = Super::NativeOnMouseButtonDown(InGeometry, InMouseEvent);
-	MyReply = UWidgetBlueprintLibrary::DetectDragIfPressed(InMouseEvent, this, EKeys::AnyKey);
+	if (InMouseEvent.IsMouseButtonDown(EKeys::LeftMouseButton)) {
+		MyReply = UWidgetBlueprintLibrary::DetectDragIfPressed(InMouseEvent, this, EKeys::LeftMouseButton);
+	}
+	else {
+		MyReply = UWidgetBlueprintLibrary::DetectDragIfPressed(InMouseEvent, this, EKeys::RightMouseButton);
+	}
 	UE_LOG(LogTemp, Log, TEXT("Hello"));
 	return MyReply.NativeReply;
 }

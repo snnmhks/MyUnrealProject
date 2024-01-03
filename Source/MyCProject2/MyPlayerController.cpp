@@ -23,10 +23,10 @@ void AMyPlayerController::BeginPlay() {
 	if (IsValid(MyPawn)) {
 		MyPawn = Cast<AMyCharacter>(GetPawn());
 	}
-	//if (IsValid(UI_ShopClass)) {
-	//	UI_Shop = Cast<UShopWidget>(CreateWidget(GetWorld(), UI_ShopClass));
-	//	UI_Shop->AddToViewport();
-	//}
+	if (IsValid(UI_ShopClass)) {
+		UI_Shop = Cast<UShopWidget>(CreateWidget(GetWorld(), UI_ShopClass));
+		UI_Shop->AddToViewport();
+	}
 }
 
 void AMyPlayerController::Tick(float DeltaTime) {

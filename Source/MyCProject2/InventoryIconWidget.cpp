@@ -8,6 +8,7 @@
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
+#include "ItemDataStructure.h"
 #include "Kismet/GameplayStatics.h"
 #include "MyCharacter.h"
 #include "ItemDrag.h"
@@ -119,8 +120,7 @@ bool UInventoryIconWidget::NativeOnDrop(const FGeometry& InGeoMetry, const FDrag
 		return true;
 		break;
 	case SLOT_Quick:
-		UE_LOG(LogTemp, Log, TEXT("%d"), this->HaveItem->Type);
-		if (this->HaveItem->Type == ITEM_Useable) {
+		if (this->HaveItem->Type == EItemType::ITEM_Useable) {
 			this->HaveItem->SetItemData(Oper->DragItem->HaveItem);
 			this->SetItemData();
 		}

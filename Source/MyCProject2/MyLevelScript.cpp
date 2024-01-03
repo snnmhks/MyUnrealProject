@@ -52,7 +52,7 @@ void AMyLevelScript::SpawnEnemy() {
 
 void AMyLevelScript::KilledEnemy() {
 	KilledEnemyNum++;
-	if (KilledEnemyNum == MaxSpawnEnemyNum) {
+	if (KilledEnemyNum == 1) {
 		KilledEnemyNum = 0;
 		MyCharacterController->OpenShop();
 	}
