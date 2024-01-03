@@ -11,19 +11,21 @@
 AMyLevelScript::AMyLevelScript() {
 	KilledEnemyNum = 0;
 	GameLevel = 1;
-	MaxSpawnEnemyNum = 5;
+	MaxSpawnEnemyNum = 20;
+	SpawnNum = 0;
 	MyCharacterController = Cast<AMyPlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
 
 }
 
 void AMyLevelScript::BeginPlay() {
 	Super::BeginPlay();
-	//SpawnEnemy();
+	GetWorldTimerManager().SetTimer(SpawnTimerHandle, this, &AMyLevelScript::SpawnEnemy, 10, true, 0);
 }
 
 void AMyLevelScript::SpawnEnemy() {
+	SpawnNum++;
 	float Percent = 0.5f;
-	int SpawnNum = 0;
+	int SpawnEnemyNum = 0;
 	// 랜덤 위치에 적을 소환
 	for (int j = 0; j < 4; j++) {
 		for (int k = 0; k < 5; k++) {
@@ -41,12 +43,16 @@ void AMyLevelScript::SpawnEnemy() {
 				}
 				
 				Percent = 0.5f;
-				SpawnNum++;
-				if (SpawnNum == MaxSpawnEnemyNum) break;
+				SpawnEnemyNum++;
+				if (SpawnEnemyNum == 5) break;
 			}
 			else Percent += 0.1f;
 		}
-		if (SpawnNum == MaxSpawnEnemyNum) break;
+		if (SpawnEnemyNum == 5) break;
+	}
+	if (SpawnNum == 4) {
+		SpawnNum = 0;
+		GetWorldTimerManager().ClearTimer(SpawnTimerHandle);
 	}
 }
 

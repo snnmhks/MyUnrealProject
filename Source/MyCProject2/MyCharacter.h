@@ -40,7 +40,7 @@ private:
 	UPROPERTY(VisibleAnywhere)
 		float CameraRotateScale;
 	// 스킬쿨 함수들이 몇초마다 1번씩 돌아가게 할 건지 정하는 변수
-	// 숫자가 높을수록 더 자주 호출하여 자연스러운 쿨타임을 연출하나 너무 많이 호출하면 성능이 떨어진다.
+	// 숫자가 낮을수록 더 자주 호출하여 자연스러운 쿨타임을 연출하나 너무 많이 호출하면 성능이 떨어진다.
 	UPROPERTY(VisibleAnywhere)
 		float SkillCoolRate;
 

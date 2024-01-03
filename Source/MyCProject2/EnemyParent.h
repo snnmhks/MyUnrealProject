@@ -79,5 +79,5 @@ public:
 	float EnemyAttack();
 
 	// 데미지를 주면 호출할 함수
-	void SetItemData();
+	bool SetItemData();
 };

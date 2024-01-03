@@ -139,10 +139,7 @@ void AEnemyParent::OnDamaged(float _Damage) {
 			// 죽을 때 선물할 아이템 데이터를 생성해 놓는다.
 			Cast<AMyLevelScript>(GetWorld()->GetLevelScriptActor())->KilledEnemy();
 			ItemData = NewObject<UItemData>();
-			SetItemData();
-			if (TargetPlayer->GetItem(ItemData)) {
-
-			}
+			if (SetItemData()) TargetPlayer->GetItem(ItemData);
 			Cast<AEnemyAIController>(GetController())->StopBT();
 			EnemyAnim->StopCurrentMongtage();
 			EnemyAnim->PlayMongtage(DieMongtage);
@@ -155,12 +152,15 @@ float AEnemyParent::EnemyAttack() {
 	return EnemyAnim->PlayMongtage(AttackMontage1);
 }
 
-void AEnemyParent::SetItemData() {
-	float tmp = 0.5f;
-	if (tmp > FMath::RandRange(0, 1)) {
+bool AEnemyParent::SetItemData() {
+	int tmp = 10;
+	if (tmp > FMath::RandRange(0, 100)) {
 		ItemData->SetItemData(FName(TEXT("HPPortion")));
+		return true;
 	}
-	else {
+	if (tmp > FMath::RandRange(0, 100)) {
 		ItemData->SetItemData(FName(TEXT("MPPortion")));
+		return true;
 	}
+	return false;
 }

@@ -21,10 +21,14 @@ public:
 	int KilledEnemyNum;
 	int GameLevel;
 	int MaxSpawnEnemyNum;
+	int SpawnNum;
 
 	// 캐릭터 컨트롤러
 	UPROPERTY(VisibleAnywhere)
 		class AMyPlayerController* MyCharacterController;
+
+	// 타이머 핸들러
+	FTimerHandle SpawnTimerHandle;
 
 public:
 	AMyLevelScript();
