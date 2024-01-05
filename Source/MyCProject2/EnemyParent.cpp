@@ -41,6 +41,8 @@ AEnemyParent::AEnemyParent()
 	EWidget->SetCollisionProfileName("NoCollision");
 	// 다른 컴포넌트들과 다르게 SetUpAttachment만 있다. -> RootComponent에 붙인다.
 	EWidget->SetupAttachment(RootComponent);
+
+	AttackSpeed = 1.0f;
 }
 
 // Called when the game starts or when spawned
@@ -57,7 +59,8 @@ void AEnemyParent::BeginPlay()
 	if (EnemyAnim) {
 		// 죽음에 도달하면 이 엑터는 사라진다.
 		EnemyAnim->DieCheck.AddLambda([this]()-> void {
-			Destroy();
+			EnemyAnim->Montage_Pause(DieMongtage);
+			GetWorldTimerManager().SetTimer(DieTimerHandle, this, &AEnemyParent::Diying, 1, false, 1);
 		});
 
 		// 스폰 몽타주가 끝나면 비헤비어 트리를 작동한다.
@@ -149,7 +152,7 @@ void AEnemyParent::OnDamaged(float _Damage) {
 }
 
 float AEnemyParent::EnemyAttack() {
-	return EnemyAnim->PlayMongtage(AttackMontage1);
+	return EnemyAnim->Montage_Play(AttackMontage1, AttackSpeed);
 }
 
 bool AEnemyParent::SetItemData() {
@@ -163,4 +166,9 @@ bool AEnemyParent::SetItemData() {
 		return true;
 	}
 	return false;
+}
+
+void AEnemyParent::Diying() {
+	GetWorldTimerManager().ClearTimer(DieTimerHandle);
+	Destroy();
 }

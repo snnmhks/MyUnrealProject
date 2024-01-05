@@ -21,6 +21,10 @@ private:
 
 public:
 
+	FTimerHandle DieTimerHandle;
+
+	float AttackSpeed;
+
 	// 플레이어
 	UPROPERTY(VisibleAnywhere)
 		class AMyCharacter* TargetPlayer;
@@ -80,4 +84,7 @@ public:
 
 	// 데미지를 주면 호출할 함수
 	bool SetItemData();
+
+	// 데미지를 주면 호출할 함수
+	void Diying();
 };

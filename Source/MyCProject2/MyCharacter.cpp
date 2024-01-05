@@ -369,9 +369,9 @@ void AMyCharacter::BeginPlay()
 			AttackBox = SkillArea.FindRef("MRSkillBox2");
 		}
 	});
-
+	// 죽음 감지
 	MyAnim->OnDieCheck.AddLambda([this]()-> void {
-		GetWorldTimerManager().SetTimer(DieTimerHandle, this, &AMyCharacter::Diying, 0.1, false, 1);
+		GetWorldTimerManager().SetTimer(DieTimerHandle, this, &AMyCharacter::Diying, 1, false, 1);
 	});
 
 	// 타격 유무를 감지하는 델리게이트

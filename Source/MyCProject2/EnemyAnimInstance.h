@@ -30,11 +30,16 @@ public:
 	// 지금 재생중인 몽타주
 	UPROPERTY(VisibleAnywhere)
 		class UAnimMontage* CurrentMongtage;
+	// 적 속도
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+		float EnemyVelocity;
+
+protected:
+	virtual void NativeBeginPlay() override;
+	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 
 public:
 	UEnemyAnimInstance();
-
-	virtual void NativeBeginPlay() override;
 
 	UFUNCTION()
 		float PlayMongtage(UAnimMontage* _Mongtage);

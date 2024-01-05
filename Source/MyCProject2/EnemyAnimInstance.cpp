@@ -9,6 +9,16 @@ UEnemyAnimInstance::UEnemyAnimInstance() {
 
 void UEnemyAnimInstance::NativeBeginPlay() {
 	Super::NativeBeginPlay();
+
+}
+
+void UEnemyAnimInstance::NativeUpdateAnimation(float DeltaSeconds) {
+	Super::NativeUpdateAnimation(DeltaSeconds);
+
+	APawn* EnemyOwner = TryGetPawnOwner();
+	if (IsValid(EnemyOwner)) {
+		EnemyVelocity = EnemyOwner->GetVelocity().Size();
+	}
 }
 
 float UEnemyAnimInstance::PlayMongtage(UAnimMontage* _Mongtage) {
