@@ -48,8 +48,11 @@ void AEnemy_Bear::PostInitializeComponents() {
 void AEnemy_Bear::BeginPlay() {
 	Super::BeginPlay();
 
-	EnemyCurrentHP = 100;
 	EnemyMaxHP = 100;
+	EnemyCurrentHP = EnemyMaxHP;
 	EnemyDamage = 10;
 	EnemyGold = 10;
+	AttackSpeed = 1.0f;
+	AttackRange = 200.0f;
+	AttackRadius = 50.0f;
 }

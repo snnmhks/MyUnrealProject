@@ -18,10 +18,19 @@ EBTNodeResult::Type UBTT_EnemyAttack::ExecuteTask(UBehaviorTreeComponent& OwnerC
 	if (nullptr == ControllingPawn) return EBTNodeResult::Failed;
 	else {
 		FVector TargetVector = OwnerComp.GetBlackboardComponent()->GetValueAsVector(AEnemyAIController::KeyTargetPosition);
-		FRotator TargetRotation = UKismetMathLibrary::FindLookAtRotation(ControllingPawn->GetActorLocation(), TargetVector);
-		ControllingPawn->SetActorRotation(TargetRotation);
-		OwnerComp.GetBlackboardComponent()->SetValueAsFloat(AEnemyAIController::KeyMongtageTime, ControllingPawn->EnemyAttack() + 1.0f);
-		return EBTNodeResult::Succeeded;
+		float TargetDistance = (ControllingPawn->GetActorLocation() - TargetVector).Size();
+		if (TargetDistance < ControllingPawn->AttackRange) {
+			FRotator TargetRotation = UKismetMathLibrary::FindLookAtRotation(ControllingPawn->GetActorLocation(), TargetVector);
+			ControllingPawn->SetActorRotation(TargetRotation);
+			OwnerComp.GetBlackboardComponent()->SetValueAsFloat(AEnemyAIController::KeyMongtageTime, ControllingPawn->EnemyAttack());
+			return EBTNodeResult::Succeeded;
+		}
+		else if (ControllingPawn->LDAttackRange > 0 && TargetDistance < ControllingPawn->LDAttackRange) {
+			FRotator TargetRotation = UKismetMathLibrary::FindLookAtRotation(ControllingPawn->GetActorLocation(), TargetVector);
+			ControllingPawn->SetActorRotation(TargetRotation);
+			OwnerComp.GetBlackboardComponent()->SetValueAsFloat(AEnemyAIController::KeyMongtageTime, ControllingPawn->EnemyLDAttack());
+			return EBTNodeResult::Succeeded;
+		}
 	}
 	return EBTNodeResult::Failed;
 }

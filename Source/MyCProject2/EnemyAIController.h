@@ -26,6 +26,7 @@ public:
 	static const FName KeyRandomPosition;
 	static const FName KeyTargetPosition;
 	static const FName KeyMongtageTime;
+	static const FName KeyIsInTarget;
 
 public:
 	AEnemyAIController();

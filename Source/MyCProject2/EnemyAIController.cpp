@@ -9,6 +9,7 @@
 const FName AEnemyAIController::KeyRandomPosition(TEXT("RandomPosition"));
 const FName AEnemyAIController::KeyTargetPosition(TEXT("TargetPosition"));
 const FName AEnemyAIController::KeyMongtageTime(TEXT("MongtageTime"));
+const FName AEnemyAIController::KeyIsInTarget(TEXT("IsInTarget"));
 
 AEnemyAIController::AEnemyAIController() {
 	static ConstructorHelpers::FObjectFinder<UBlackboardData> BLACK_BOARD(TEXT("BlackboardData'/Game/AI/BB_Enemy'"));

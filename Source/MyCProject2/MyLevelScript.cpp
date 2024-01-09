@@ -6,6 +6,7 @@
 #include "MyPlayerController.h"
 #include "Enemy_Bear.h"
 #include "Enemy_Spider.h"
+#include "Enemy_Grunt.h"
 #include "Math/UnrealMathUtility.h"
 #include "Kismet/GameplayStatics.h" // GetPlayerController »ç¿ë
 
@@ -20,7 +21,7 @@ AMyLevelScript::AMyLevelScript() {
 
 void AMyLevelScript::BeginPlay() {
 	Super::BeginPlay();
-	GetWorldTimerManager().SetTimer(SpawnTimerHandle, this, &AMyLevelScript::SpawnEnemy, 10, true, 0);
+	//GetWorldTimerManager().SetTimer(SpawnTimerHandle, this, &AMyLevelScript::SpawnEnemy, 10, true, 0);
 }
 
 void AMyLevelScript::SpawnEnemy() {
@@ -36,10 +37,13 @@ void AMyLevelScript::SpawnEnemy() {
 				SpawnLocation.Y = k * 600 + 300 - 1500;
 				switch (GameLevel) {
 				case 1:
-					GetWorld()->SpawnActor<AEnemy_Spider>(SpawnLocation, FRotator(0.0f, 180.0f, 0.0f));
+					GetWorld()->SpawnActor<AEnemy_Grunt>(SpawnLocation, FRotator(0.0f, 180.0f, 0.0f));
 					break;
 				case 2:
 					GetWorld()->SpawnActor<AEnemy_Bear>(SpawnLocation, FRotator(0.0f, 180.0f, 0.0f));
+					break;
+				case 3:
+					GetWorld()->SpawnActor<AEnemy_Spider>(SpawnLocation, FRotator(0.0f, 180.0f, 0.0f));
 					break;
 				}
 				

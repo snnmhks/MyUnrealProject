@@ -15,7 +15,7 @@ UBTT_FindRandomPosition::UBTT_FindRandomPosition() {
 
 EBTNodeResult::Type UBTT_FindRandomPosition::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) {
 
-	APawn* ControllingPawn = OwnerComp.GetAIOwner()->GetPawn();
+	AEnemyParent* ControllingPawn = Cast<AEnemyParent>(OwnerComp.GetAIOwner()->GetPawn());
 	if (nullptr == ControllingPawn) return EBTNodeResult::Failed;
 
 	UNavigationSystemV1* NavSystem = UNavigationSystemV1::GetNavigationSystem(ControllingPawn->GetWorld());
@@ -24,6 +24,14 @@ EBTNodeResult::Type UBTT_FindRandomPosition::ExecuteTask(UBehaviorTreeComponent&
 	AMyCharacter* TargetPlayer = Cast<AEnemyParent>(ControllingPawn)->TargetPlayer;
 	if (TargetPlayer && !(TargetPlayer->ActionState == "Die")) {
 		OwnerComp.GetBlackboardComponent()->SetValueAsVector(AEnemyAIController::KeyTargetPosition, TargetPlayer->GetActorLocation());
+		float TargetDistance = (ControllingPawn->GetActorLocation() - TargetPlayer->GetActorLocation()).Size();
+		if ((ControllingPawn->LDAttackRange > 0 && TargetDistance < ControllingPawn->LDAttackRange) ||
+			TargetDistance < ControllingPawn->AttackRange) {
+			OwnerComp.GetBlackboardComponent()->SetValueAsBool(AEnemyAIController::KeyIsInTarget, false);
+		}
+		else {
+			OwnerComp.GetBlackboardComponent()->SetValueAsBool(AEnemyAIController::KeyIsInTarget, true);
+		}
 		return EBTNodeResult::Succeeded;
 	}
 

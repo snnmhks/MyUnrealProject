@@ -43,6 +43,9 @@ AEnemyParent::AEnemyParent()
 	EWidget->SetupAttachment(RootComponent);
 
 	AttackSpeed = 1.0f;
+	AttackRange = 200.0f;
+	LDAttackRange = 0.0f;
+	AttackRadius = 50.0f;
 }
 
 // Called when the game starts or when spawned
@@ -70,29 +73,40 @@ void AEnemyParent::BeginPlay()
 
 		// 공격 타이밍에 맞춰 sweep trace를 실행
 		EnemyAnim->AttackCheck.AddLambda([this]()->void {
-			float AttackRange = 200.0f;
-			float AttackRadius = 50.0f;
+			PlayEffect();
+			float ARange = 0.0f;
+			float ARadius = 0.0f;
+			switch (AS) {
+			case Basic_Attack:
+				ARange = AttackRange;
+				ARadius = AttackRadius;
+				break;
+			case LD_Attack:
+				ARange = LDAttackRange;
+				ARadius = LDAttackRadius;
+			}
 			FHitResult HitResult;
 			FCollisionQueryParams Params(EName::None, false, this);
 			bool IsHit = GetWorld()->SweepSingleByChannel(
 				HitResult,
 				GetActorLocation(),
-				GetActorLocation() + GetActorForwardVector() * AttackRange,
+				GetActorLocation() + GetActorForwardVector() * ARange,
 				FQuat::Identity,
 				ECollisionChannel::ECC_GameTraceChannel2,
-				FCollisionShape::MakeSphere(AttackRadius),
+				FCollisionShape::MakeSphere(ARadius),
 				Params);
 			if (IsHit) {
 				AMyCharacter* SweepCharacter = Cast<AMyCharacter>(HitResult.GetActor());
 				if (SweepCharacter && !(SweepCharacter->ActionState == "Die")) {
+					PlayHittedEffect(HitResult.ImpactPoint);
 					SweepCharacter->DiffHP(-EnemyDamage);
 				}
 			}
 
 #if ENABLE_DRAW_DEBUG
-			FVector TraceVector = GetActorForwardVector() * AttackRange;
+			FVector TraceVector = GetActorForwardVector() * ARange;
 			FVector Center = GetActorLocation() + TraceVector * 0.5f;
-			float HalfHeight = AttackRange * 0.5f + AttackRadius;
+			float HalfHeight = ARange * 0.5f + ARadius;
 			FQuat CapsuleRot = FRotationMatrix::MakeFromZ(TraceVector).ToQuat();
 			FColor DrawColor = IsHit ? FColor::Green : FColor::Red;
 			float DebugTime = 5.0f;
@@ -101,7 +115,7 @@ void AEnemyParent::BeginPlay()
 				GetWorld(),
 				Center,
 				HalfHeight,
-				AttackRadius,
+				ARadius,
 				CapsuleRot,
 				DrawColor,
 				false,
@@ -152,7 +166,15 @@ void AEnemyParent::OnDamaged(float _Damage) {
 }
 
 float AEnemyParent::EnemyAttack() {
+	if (!IsValid(AttackMontage1)) return 0.0f;
+	AS = Basic_Attack;
 	return EnemyAnim->Montage_Play(AttackMontage1, AttackSpeed);
+}
+
+float AEnemyParent::EnemyLDAttack() {
+	if (!IsValid(LDAttackMontage1)) return 0.0f;
+	AS = LD_Attack;
+	return EnemyAnim->Montage_Play(LDAttackMontage1, AttackSpeed);
 }
 
 bool AEnemyParent::SetItemData() {
@@ -172,3 +194,7 @@ void AEnemyParent::Diying() {
 	GetWorldTimerManager().ClearTimer(DieTimerHandle);
 	Destroy();
 }
+
+void AEnemyParent::PlayEffect() {}
+
+void AEnemyParent::PlayHittedEffect(FVector SpawnLocation) {}

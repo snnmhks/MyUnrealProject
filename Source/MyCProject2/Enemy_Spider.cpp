@@ -53,4 +53,6 @@ void AEnemy_Spider::BeginPlay() {
 	EnemyDamage = 8;
 	EnemyGold = 20;
 	AttackSpeed = 1.5f;
+	AttackRange = 300.0f;
+	AttackRadius = 50.0f;
 }
