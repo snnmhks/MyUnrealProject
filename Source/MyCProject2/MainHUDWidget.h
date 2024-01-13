@@ -24,6 +24,9 @@ public:
 	// UI들 화면
 	UPROPERTY(meta = (BindWidget))
 		class UInventoryWidget* UI_Inventory;
+	// 상점 창 화면
+	UPROPERTY(meta = (BindWidget))
+		class UShopWidget* UI_Shop;
 
 public:
 	void UsingItemQuickSlot(FName _ItemName);

@@ -23,9 +23,9 @@ public:
 	int MaxSpawnEnemyNum;
 	int SpawnNum;
 
-	// 캐릭터 컨트롤러
+	// 캐릭터
 	UPROPERTY(VisibleAnywhere)
-		class AMyPlayerController* MyCharacterController;
+		class AMyCharacter* MyCharacter;
 
 	// 타이머 핸들러
 	FTimerHandle SpawnTimerHandle;

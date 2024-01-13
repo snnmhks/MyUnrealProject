@@ -46,6 +46,8 @@ AEnemyParent::AEnemyParent()
 	AttackRange = 200.0f;
 	LDAttackRange = 0.0f;
 	AttackRadius = 50.0f;
+
+	AddGiveGold = 1.0f;
 }
 
 // Called when the game starts or when spawned
@@ -97,7 +99,7 @@ void AEnemyParent::BeginPlay()
 				Params);
 			if (IsHit) {
 				AMyCharacter* SweepCharacter = Cast<AMyCharacter>(HitResult.GetActor());
-				if (SweepCharacter && !(SweepCharacter->ActionState == "Die")) {
+				if (SweepCharacter && !(SweepCharacter->ActionState == static_cast<int>(EActionState::STATE_Die))) {
 					PlayHittedEffect(HitResult.ImpactPoint);
 					SweepCharacter->DiffHP(-EnemyDamage);
 				}
@@ -151,7 +153,6 @@ void AEnemyParent::OnDamaged(float _Damage) {
 		IsDying = true;
 		EnemyCurrentHP = 0;
 		if (DieMongtage && EnemyAnim) {
-			TargetPlayer->GoldDiff(EnemyGold);
 			GetCapsuleComponent()->SetCollisionProfileName("NoCollision");
 			// 죽을 때 선물할 아이템 데이터를 생성해 놓는다.
 			Cast<AMyLevelScript>(GetWorld()->GetLevelScriptActor())->KilledEnemy();
@@ -188,6 +189,12 @@ bool AEnemyParent::SetItemData() {
 		return true;
 	}
 	return false;
+}
+
+void AEnemyParent::GiveGold() {
+	if (30 < FMath::RandRange(0, 100)) {
+		TargetPlayer->GoldDiff(EnemyGold * AddGiveGold);
+	}
 }
 
 void AEnemyParent::Diying() {

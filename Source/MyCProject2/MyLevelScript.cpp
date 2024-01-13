@@ -3,7 +3,7 @@
 
 #include "MyLevelScript.h"
 #include "MyCharacter.h"
-#include "MyPlayerController.h"
+#include "MyCharacter.h"
 #include "Enemy_Bear.h"
 #include "Enemy_Spider.h"
 #include "Enemy_Grunt.h"
@@ -15,13 +15,12 @@ AMyLevelScript::AMyLevelScript() {
 	GameLevel = 1;
 	MaxSpawnEnemyNum = 20;
 	SpawnNum = 0;
-	MyCharacterController = Cast<AMyPlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
-
 }
 
 void AMyLevelScript::BeginPlay() {
 	Super::BeginPlay();
 	//GetWorldTimerManager().SetTimer(SpawnTimerHandle, this, &AMyLevelScript::SpawnEnemy, 10, true, 0);
+	MyCharacter = Cast<AMyCharacter>(UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetPawn());
 }
 
 void AMyLevelScript::SpawnEnemy() {
@@ -37,13 +36,13 @@ void AMyLevelScript::SpawnEnemy() {
 				SpawnLocation.Y = k * 600 + 300 - 1500;
 				switch (GameLevel) {
 				case 1:
-					GetWorld()->SpawnActor<AEnemy_Grunt>(SpawnLocation, FRotator(0.0f, 180.0f, 0.0f));
-					break;
-				case 2:
 					GetWorld()->SpawnActor<AEnemy_Bear>(SpawnLocation, FRotator(0.0f, 180.0f, 0.0f));
 					break;
-				case 3:
+				case 2:
 					GetWorld()->SpawnActor<AEnemy_Spider>(SpawnLocation, FRotator(0.0f, 180.0f, 0.0f));
+					break;
+				case 3:
+					GetWorld()->SpawnActor<AEnemy_Grunt>(SpawnLocation, FRotator(0.0f, 180.0f, 0.0f));
 					break;
 				}
 				
@@ -63,14 +62,14 @@ void AMyLevelScript::SpawnEnemy() {
 
 void AMyLevelScript::KilledEnemy() {
 	KilledEnemyNum++;
-	if (KilledEnemyNum == 1) {
+	if (KilledEnemyNum >= MaxSpawnEnemyNum) {
 		KilledEnemyNum = 0;
-		MyCharacterController->OpenShop();
+		MyCharacter->ShopOnOff(true);
 	}
 }
 
 void AMyLevelScript::EndShop() {
-	MyCharacterController->CloseShop();
+	MyCharacter->ShopOnOff(false);
 	GameLevel++;
-	SpawnEnemy();
+	GetWorldTimerManager().SetTimer(SpawnTimerHandle, this, &AMyLevelScript::SpawnEnemy, 10, true, 0);
 }

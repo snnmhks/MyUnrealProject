@@ -32,6 +32,8 @@ public:
 	float LDAttackRange;
 	float LDAttackRadius;
 
+	float AddGiveGold;
+
 	AttackState AS;
 
 	// 플레이어
@@ -99,9 +101,10 @@ public:
 	float EnemyAttack();
 	float EnemyLDAttack();
 
-	// 데미지를 주면 호출할 함수
+	// 아이템 줄 때 호출할 함수
 	bool SetItemData();
+	void GiveGold();
 
-	// 데미지를 주면 호출할 함수
+	// 죽으면 호출할 함수
 	void Diying();
 };

@@ -6,6 +6,7 @@
 #include "MyPlayerController.h"
 #include "MySkillWidget.h"
 #include "MainHUDWidget.h"
+#include "ShopWidget.h"
 #include "InventoryWidget.h"
 #include "SkillDataStruct.h"
 #include "ItemData.h"
@@ -22,7 +23,6 @@
 #include "Engine/DataTable.h" // 데이터 테이블 사용
 #include "Components/ProgressBar.h" // ProgressBar 사용
 #include "EnemyParent.h"
-
 
 // Sets default values
 AMyCharacter::AMyCharacter()
@@ -44,7 +44,12 @@ AMyCharacter::AMyCharacter()
 	// 컨트롤러
 	// 
 	// 공격 변수
-	ActionState = "Idle";								// 현재 캐릭터의 상태를 표현
+	ActionState = static_cast<int>(EActionState::STATE_MovePossible) + 
+		static_cast<int>(EActionState::STATE_CameraRotatePossible) +
+		static_cast<int>(EActionState::STATE_RecoverPossible) +
+		static_cast<int>(EActionState::STATE_CancelPossible);
+	AttackStates = EAttackStates::NONE;
+														// 현재 캐릭터의 상태를 표현
 														// 현재 캐릭터의 상태를 통해 여러 행동이 서로 간섭하지 않도록 하였다.
 	ComboNum = 1;										// 콤보 공격할 때 몇번째 콤보인지 나타낸다.
 	IsCombo = 0;										// 콤보 공격 키를 감지해서 다음 콤보 공격을 할 지 판단한다.
@@ -277,6 +282,7 @@ void AMyCharacter::BeginPlay()
 		UI_MainHUD->AddToViewport();
 		UI_Skill = UI_MainHUD->UI_SkillWidget;
 		UI_Inventory = UI_MainHUD->UI_Inventory;
+		UI_Shop = UI_MainHUD->UI_Shop;
 	}
 
 	// 무기 매쉬 생성 
@@ -302,27 +308,22 @@ void AMyCharacter::BeginPlay()
 	MyAnim->OnMontageEnded.AddDynamic(this, &AMyCharacter::AttackEnded);
 	// 콤보를 감지 했을 때 실행되는 델리게이트
 	MyAnim->OnNextComboCheck.AddLambda([this]()-> void {
-		IsAttackAble = false;
-		if (IsCombo) {
-			IsCombo = 0;
+		if (EAttackStates::ATTACK_ComboPossible == AttackStates) {
+			AttackStates = EAttackStates::ATTACK_Combo;
 			ComboNum++;
 			MyAnim->NextCombo(ComboNum, "Combo");
 			switch (ComboNum) {
 			case 2:
-				ActionState = "ComboAttack2";
 				DamageValue = SkillData.FindRef("LSkillDamage2");
 				AttackRange = SkillData.FindRef("LSkillRange2");
 				AttackBox = SkillArea.FindRef("LSkillBox2");
 				break;
 			case 3:
-				ActionState = "ComboAttack3";
 				DamageValue = SkillData.FindRef("LSkillDamage3");
 				AttackRange = SkillData.FindRef("LSkillRange3");
 				AttackBox = SkillArea.FindRef("LSkillBox3");
-				IsCombo = 1;
 				break;
 			case 4:
-				ActionState = "ComboAttack4";
 				DamageValue = SkillData.FindRef("LSkillDamage4");
 				AttackRange = SkillData.FindRef("LSkillRange4");
 				AttackBox = SkillArea.FindRef("LSkillBox4");
@@ -333,36 +334,34 @@ void AMyCharacter::BeginPlay()
 	// 스프린트 도중 공격을 감지했을 때 실행되는 델리게이트
 	MyAnim->OnSprintAttackPossible.AddLambda([this]()-> void {
 		UI_Skill->MLActivate();
-		ActionState = "SprintAttackPossible";
+		AttackStates = EAttackStates::ATTACK_SprintPossible;
 	});
 	// 닷지 도중 공격을 감지했을 때 실행되는 델리게이트
 	MyAnim->OnDodgeAttackCheck.AddLambda([this]()-> void {
 		UI_Skill->MLDisable();
-		if (ActionState == "DodgeAttackPossible") {
-			ActionState = "DodgeAttack";
+		if (AttackStates == EAttackStates::ATTACK_DodgePossible) {
+			AttackStates = EAttackStates::ATTACK_Dodge;
 			MyAnim->JumpToDodgeAttack();
 		}
 	});
 	// 헤비 어택 차지 정도를 감지했을 때 실행되는 델리게이트
 	// 차지 정도가 낮으면 1타만 실행하고 차지가 만족되면 2타 준비를 한다.
 	MyAnim->OnNoChargeAttackCheck.AddLambda([this]()-> void {
-		IsAttackAble = false;
-		if (ActionState == "HeavyCharging") {
-			if (IsCharge == 0) {
-				Weapon->PlayEffect("Charge1");
-				IsCharge = 1;
-			}
-			else if (IsCharge == 1) {
-				ActionState = "HeavyAttack";
-				MyAnim->JumpToHeavy1();
-			}
+		if (AttackStates == EAttackStates::ATTACK_Charge1Possible) {
+			Weapon->PlayEffect("Charge1");
+		}
+		else if (AttackStates == EAttackStates::ATTACK_Charge1Possible || 
+			AttackStates == EAttackStates::ATTACK_Charge2Possible) {
+			UI_Skill->ChargeBarDisable();
+			DamageValue = SkillData.FindRef("MRSkillDamage1") + BaseDamage;
+			AttackRange = SkillData.FindRef("MRSkillRange1");
+			AttackBox = SkillArea.FindRef("MRSkillBox1");
+			MyAnim->JumpToHeavy1();
 		}
 	});
 	// 헤비 공격 2타
 	MyAnim->OnChargeAttackCheck.AddLambda([this]()-> void {
-		IsAttackAble = false;
-		if (IsCharge == 2) {
-			ActionState = "HeavyAttack2";
+		if (AttackStates == EAttackStates::ATTACK_Charge2Possible) {
 			MyAnim->JumpToHeavy2();
 			DamageValue = SkillData.FindRef("MRSkillDamage2") + BaseDamage;
 			AttackRange = SkillData.FindRef("MRSkillRange2");
@@ -422,12 +421,14 @@ void AMyCharacter::BeginPlay()
 	});
 
 	MyAnim->OnAttackDisable.AddLambda([this]()->void {
-		IsAttackAble = false;
+		AttackStates = EAttackStates::NONE;
 	});
 
 	MyAnim->OnPlayEffect.AddLambda([this]()->void {
 		Weapon->PlayEffect("Charge2");
 	});
+
+	ShopOnOff(true);
 }
 
 // Called every frame
@@ -435,16 +436,18 @@ void AMyCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	// 대쉬 공격의 리치가 짧아서 선형 보간으로 리치를 늘렸다.
-	if (ActionState == "SprintAttack") {
+	if (AttackStates == EAttackStates::ATTACK_Sprint) {
 		FVector FinalPosition = FMath::VInterpTo(GetActorLocation(), TargetPosition, DeltaTime, 5);
 		SetActorLocation(FinalPosition);
 	}
 	// 점프를 몽타주로 재생하여 점프와 착지를 구분하였고 착지 중에는 움직임이 먹히지 않도록 설정
-	else if (ActionState == "Jump") {
-		if (GetVelocity().Z == 0) ActionState = "Land";
-		MyAnim->JumpToLanding();
+	if (ActionState & static_cast<int>(EActionState::STATE_Jump)) {
+		if (GetVelocity().Z == 0) {
+			ActionState = static_cast<int>(EActionState::STATE_RecoverPossible) + static_cast<int>(EActionState::STATE_CancelPossible);
+			MyAnim->JumpToLanding();
+		}
 	}
-	if ((ActionState == "Jump" || ActionState == "Idle") && CurrentMP < CharacterState.FindRef("MaxMP") && IsRecoverMP == 0) {
+	if (ActionState & static_cast<int>(EActionState::STATE_RecoverPossible) && CurrentMP < CharacterState.FindRef("MaxMP") && IsRecoverMP == 0) {
 		IsRecoverMP = 1;
 		GetWorldTimerManager().SetTimer(RecoverMPTimerHandle, this, &AMyCharacter::NaturalRecoverMP, 1, true, 5);
 	}
@@ -484,15 +487,28 @@ void AMyCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 
 
 
-// 바인딩 한 IA를 여기서 작업
-
-void AMyCharacter::InventoryClick(const FInputActionValue& Value) {
-	UE_LOG(LogTemp, Log, TEXT("Click"));
+void AMyCharacter::ShopOnOff(bool _OnOff) {
+	if (_OnOff) {
+		UI_Shop->SetVisibility(ESlateVisibility::Visible);
+		UI_Inventory->SetVisibility(ESlateVisibility::Collapsed);
+		UI_Skill->SetVisibility(ESlateVisibility::Collapsed);
+		MyController->SetShowMouseCursor(true);
+		MyController->SetInputMode(FInputModeUIOnly());
+	}
+	else {
+		UI_Shop->SetVisibility(ESlateVisibility::Collapsed);
+		UI_Inventory->SetVisibility(ESlateVisibility::Collapsed);
+		UI_Skill->SetVisibility(ESlateVisibility::Visible);
+		MyController->SetShowMouseCursor(false);
+		MyController->SetInputMode(FInputModeGameOnly());
+	}
 }
+
+// 바인딩 한 IA를 여기서 작업
 
 // 움직이는 IA
 void AMyCharacter::Move(const FInputActionValue& Value) {
-	if (ActionState != "Idle" && ActionState != "Jump") return;
+	if (!(ActionState & static_cast<int>(EActionState::STATE_MovePossible))) return;
 	// 0벡터에 입력 Y값 * 정면 방향 + 입력 X값 * 오른쪽 방향 값을 통해 이동해야 할 방향을 구하고 Movement에 더해준다.
 	FVector Direction = FVector::ZeroVector;
 	int Y = Value.Get<FVector2D>().Y;
@@ -527,8 +543,11 @@ void AMyCharacter::DashEnd(const FInputActionValue& Value) {
 
 // 점프
 void AMyCharacter::JumpAction(const FInputActionValue& Value) {
-	if (ActionState != "Idle") return;
-	ActionState = "Jump";
+	if ((ActionState & static_cast<int>(EActionState::STATE_MovePossible))) return;
+	ActionState = static_cast<int>(EActionState::STATE_MovePossible) + 
+		static_cast<int>(EActionState::STATE_CameraRotatePossible) + 
+		static_cast<int>(EActionState::STATE_RecoverPossible) + 
+		static_cast<int>(EActionState::STATE_Jump);
 	MyAnim->PlayMongtage("Jump", AttackSpeed);
 	Jump();// 점프는 언리얼에서 함수를 구현해 놨다.
 }
@@ -553,8 +572,7 @@ void AMyCharacter::CloseUI(const FInputActionValue& Value) {
 
 // 카메라 회전
 void AMyCharacter::Look(const FInputActionValue& Value) {
-	if (ActionState != "Idle" && ActionState != "Sprint" && ActionState != "SprintAttackPossible"
-		&& ActionState != "HeavyCharging") return;
+	if (!(ActionState & static_cast<int>(EActionState::STATE_CameraRotatePossible))) return;
 	AddControllerYawInput(Value.Get<FVector2D>().X * CameraRotateScale);
 	AddControllerPitchInput(Value.Get<FVector2D>().Y * CameraRotateScale);
 }
@@ -584,18 +602,24 @@ void AMyCharacter::DiffHP(float _HP) {
 	}
 	UI_Skill->HPBar->SetPercent(CurrentHP / _MaxHP);
 	if (CurrentHP <= 0) {
-		ActionState = "Die";
+		ActionState = static_cast<int>(EActionState::STATE_Die);
 		MyAnim->PlayMongtage("Die", 1.0f);
 	}
 }
 // MP 조절 함수
 void AMyCharacter::DiffMP(float _MP) {
 	float _MaxMP = CharacterState.FindRef("MaxMP");
-	IsRecoverMP = 0;
-	GetWorldTimerManager().ClearTimer(RecoverMPTimerHandle);
+	// MP를 소비하면 MP자연 회복은 중단된다.
+	if (_MP < 0) {
+		IsRecoverMP = 0;
+		GetWorldTimerManager().ClearTimer(RecoverMPTimerHandle);
+	}
 	CurrentMP += _MP;
 	if (CurrentMP > _MaxMP) {
 		CurrentMP = _MaxMP;
+		// MP가 최대치까지 올랐으면 자연 회복은 중단된다.
+		IsRecoverMP = 0;
+		GetWorldTimerManager().ClearTimer(RecoverMPTimerHandle);
 	}
 	UI_Skill->MPBar->SetPercent(CurrentMP / CharacterState.FindRef("MaxMP"));
 }
@@ -642,45 +666,51 @@ void AMyCharacter::InventoryOnOff(const FInputActionValue& Value) {
 
 // 기본 콤보 공격
 void AMyCharacter::ComboAttack(const FInputActionValue& Value) {
-	if (ActionState == "Idle") {
-		ActionState = "ComboAttack1";
+	if (AttackStates == EAttackStates::NONE) {
+		AttackStates = EAttackStates::ATTACK_Combo;
+		ActionState = static_cast<int>(EActionState::STATE_CancelPossible);
 		MyAnim->PlayMongtage("Combo", AttackSpeed);
 		DamageValue = SkillData.FindRef("LSkillDamage1") + BaseDamage;
 		AttackRange = SkillData.FindRef("LSkillRange1");
 		AttackBox = SkillArea.FindRef("LSkillBox1");
 	}
-	else if (ActionState == "SprintAttackPossible") {
+	else if (AttackStates == EAttackStates::ATTACK_SprintPossible) {
+		AttackStates = EAttackStates::ATTACK_Sprint;
+		ActionState = static_cast<int>(EActionState::STATE_CancelPossible);
 		QSkillRunValue = 0.f;
 		UI_Skill->MLDisable();
 		UI_Skill->ChargeBarDisable();
 		GetWorldTimerManager().ClearTimer(QSkillRunTimerHandle);
-		ActionState = "SprintAttack";
 		MyAnim->NextCombo(2, "Sprint");
 		TargetPosition = GetActorLocation() + GetCapsuleComponent()->GetForwardVector() * 500;
 		DamageValue = SkillData.FindRef("QSkillDamage") + BaseDamage;
 		AttackRange = SkillData.FindRef("QSkillRange");
 		AttackBox = SkillArea.FindRef("QSkillBox");
 	}
-	else if (ActionState == "Dodge") {
-		ActionState = "DodgeAttackPossible";
+	else if (AttackStates == EAttackStates::STATE_Dodge) {
+		AttackStates = EAttackStates::ATTACK_DodgePossible;
+		ActionState = 0;
 		DamageValue = SkillData.FindRef("CSkillDamage") + BaseDamage;
 		AttackRange = SkillData.FindRef("CSkillRange");
 		AttackBox = SkillArea.FindRef("CSkillBox");
 	}
 	else {
-		IsCombo = 1;
+		AttackStates = EAttackStates::ATTACK_ComboPossible;
 	}
 }
 
 // 스프린트 시작
 void AMyCharacter::SprintAttack(const FInputActionValue& Value) {
-	if (ActionState == "Idle" && QSkillCoolValue == 0 && CurrentMP >= SkillData.FindRef("QMP")) {
+	if (AttackStates == EAttackStates::NONE && 
+		QSkillCoolValue == 0 && CurrentMP >= SkillData.FindRef("QMP")) {
+		AttackStates = EAttackStates::STATE_Sprint;
+		ActionState = static_cast<int>(EActionState::STATE_CancelPossible) + 
+			static_cast<int>(EActionState::STATE_CameraRotatePossible);
 		DiffMP(-SkillData.FindRef("QMP"));
 		UI_Skill->ChargeBarActivate("Q");
 		UI_Skill->IconSizeDown("Q");
 		GetWorldTimerManager().SetTimer(QSkillTimerHandle, this, &AMyCharacter::QSkillCoolTime, SkillCoolRate, true, 0);
 		GetWorldTimerManager().SetTimer(QSkillRunTimerHandle, this, &AMyCharacter::QSkillRunTime, SkillCoolRate, true, 0);
-		ActionState = "Sprint";
 		MyAnim->PlayMongtage("Sprint", AttackSpeed);
 		CameraRotateScale = 0.2f;
 	}
@@ -688,52 +718,53 @@ void AMyCharacter::SprintAttack(const FInputActionValue& Value) {
 
 // 후방으로 빠른 회피 및 공격 연계 가능
 void AMyCharacter::Dodge(const FInputActionValue& Value) {
-	if (ActionState == "Idle" && CSkillCoolValue == 0 && CurrentMP >= SkillData.FindRef("CMP")) {
+	if (ActionState & static_cast<int>(EActionState::STATE_CancelPossible) && CurrentMP >= SkillData.FindRef("CMP")) {
+		AttackStates = EAttackStates::STATE_Dodge;
+		ActionState = 0;
 		DiffMP(-SkillData.FindRef("CMP"));
 		UI_Skill->MLActivate();
 		UI_Skill->IconSizeDown("C");
 		GetWorldTimerManager().SetTimer(CSkillTimerHandle, this, &AMyCharacter::CSkillCoolTime, SkillCoolRate, true, 0);
-		ActionState = "Dodge";
 		MyAnim->PlayMongtage("Dodge", AttackSpeed);
 	}
 }
 
 // 강한 공격, 차지를 통해 더 강하게 때릴수 있다.
 void AMyCharacter::HeavyAttack(const FInputActionValue& Value) {
-	if (ActionState == "Idle" && MRSkillCoolValue == 0 && CurrentMP >= SkillData.FindRef("MRMP")) {
+	if (AttackStates == EAttackStates::NONE && 
+		MRSkillCoolValue == 0 && CurrentMP >= SkillData.FindRef("MRMP")) {
+		AttackStates = EAttackStates::ATTACK_Charge1Possible;
+		ActionState = static_cast<int>(EActionState::STATE_CancelPossible) + 
+			static_cast<int>(EActionState::STATE_CameraRotatePossible);
 		DiffMP(-SkillData.FindRef("MRMP"));
 		UI_Skill->ChargeBarActivate("MR");
 		UI_Skill->IconSizeDown("MR");
 		GetWorldTimerManager().SetTimer(MRSkillTimerHandle, this, &AMyCharacter::MRSkillCoolTime, SkillCoolRate, true, 0);
 		GetWorldTimerManager().SetTimer(MRSkillChargeTimerHandle, this, &AMyCharacter::MRSkillChargeTime, SkillCoolRate, true, 0);
 		CameraRotateScale = 0.1f;
-		ActionState = "HeavyCharging";
 		MyAnim->PlayMongtage("Heavy", AttackSpeed);
-		DamageValue = SkillData.FindRef("MRSkillDamage1") + BaseDamage;
-		AttackRange = SkillData.FindRef("MRSkillRange1");
-		AttackBox = SkillArea.FindRef("MRSkillBox1");
 	}
 }
 
 void AMyCharacter::HeavyEnd(const FInputActionValue& Value) {
-	UI_Skill->ChargeBarDisable();
 	GetWorldTimerManager().ClearTimer(MRSkillChargeTimerHandle);
-	if (IsCharge == 0 && ActionState == "HeavyCharging") IsCharge = 1;
-	else if (IsCharge >= 1 && ActionState == "HeavyCharging") {
-		ActionState = "HeavyAttack";
+	if (AttackStates == EAttackStates::ATTACK_Charge1Possible || 
+		AttackStates == EAttackStates::ATTACK_Charge2Possible) {
 		MyAnim->JumpToHeavy1();
 	}
 }
 
 // 몽타주가 끝나면 실행되는 함수 항상 캐릭터의 상태와 관련된 것들을 초기화 한다.
 void AMyCharacter::AttackEnded(UAnimMontage* Montage, bool bInterrupted) {
-	if (ActionState == "Die") return;
-	IsCombo = 0;
-	ActionState = "Idle";
+	if (ActionState == static_cast<int>(EActionState::STATE_Die)) return;
+	AttackStates = EAttackStates::NONE;
+	ActionState = static_cast<int>(EActionState::STATE_MovePossible) + 
+		static_cast<int>(EActionState::STATE_CameraRotatePossible) + 
+		static_cast<int>(EActionState::STATE_RecoverPossible) + 
+		static_cast<int>(EActionState::STATE_CancelPossible);
 	ComboNum = 1;
 	ChargeValue = 0;
 	CameraRotateScale = 1.f;
-	IsCharge = 0;
 }
 
 // 쿨타임 함수
@@ -793,10 +824,9 @@ void AMyCharacter::MRSkillChargeTime() {
 	float MaxChargeValue = SkillData.FindRef("MRMaxChargeValue");
 	UI_Skill->ChargeBar->SetPercent(ChargeValue / CompleteChargeTime);
 	if (ChargeValue >= CompleteChargeTime && ChargeValue < MaxChargeValue) {
-		IsCharge = 2;
+		AttackStates = EAttackStates::ATTACK_Charge2Possible;
 	}
 	else if (ChargeValue >= MaxChargeValue) {
-		ActionState = "HeavyAttack";
 		MyAnim->JumpToHeavy1();
 		UI_Skill->ChargeBarDisable();
 		GetWorldTimerManager().ClearTimer(MRSkillChargeTimerHandle);

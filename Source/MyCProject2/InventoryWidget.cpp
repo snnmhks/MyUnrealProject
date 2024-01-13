@@ -54,6 +54,10 @@ void UInventoryWidget::SetGoldValue(int _Gold) {
 	GoldText->SetText(FText::FromString(FString::FromInt(_Gold)));
 }
 
+void UInventoryWidget::SetCrystalValue(int _Gold) {
+	CrystalText->SetText(FText::FromString(FString::FromInt(_Gold)));
+}
+
 bool UInventoryWidget::AddItemToInventory(UItemData* _Item) {
 	if (_Item == nullptr) return false;
 	if (CurrentIndex >= 15) return false;

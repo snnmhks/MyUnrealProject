@@ -18,14 +18,8 @@ class MYCPROJECT2_API AMyPlayerController : public APlayerController
 public:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly)
 		class AMyCharacter* MyPawn;
-	// Shop 창에 대한 UI를 받아오는 변수
-	TSubclassOf<class UUserWidget> UI_ShopClass;
-	UPROPERTY(VisibleAnywhere, Category = UI)
-		class UShopWidget* UI_Shop;
 
 public:
-	void OpenShop();
-	void CloseShop();
 
 private:
 	AMyPlayerController();

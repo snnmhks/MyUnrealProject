@@ -31,12 +31,32 @@ public:
 		class UButton* Energy;
 	UPROPERTY(meta = (BindWidget))
 		class UButton* Finish;
+	UPROPERTY(meta = (BindWidget))
+		class UButton* AutoAttack;
+	UPROPERTY(meta = (BindWidget))
+		class UButton* MoreGold;
+	UPROPERTY(meta = (BindWidget))
+		class UButton* MoreEnemy;
+	UPROPERTY(meta = (BindWidget))
+		class UCanvasPanel* ExpainWindow;
+	UPROPERTY(meta = (BindWidget))
+		class UTextBlock* UpgradeTitle;
+	UPROPERTY(meta = (BindWidget))
+		class UTextBlock* ExplainUpgrade;
 	
 public:
 	UFUNCTION()
 		void DamageUpgrade();
 	UFUNCTION()
 		void EndUpgrade();
+	void SetExplainDamage();
+	void SetExplainAttackSpeed();
+	void SetExplainDefense();
+	void SetExplainHealth();
+	void SetExplainEnergy();
+	void SetExplainAutoAttack();
+	void SetExplainMoreGold();
+	void SetExplainMoreEnemy();
 
 protected:
 	virtual void NativeOnInitialized() override;

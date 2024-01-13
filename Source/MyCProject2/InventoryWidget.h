@@ -24,9 +24,12 @@ public:
 	// UI 전체를 담은 캔버스
 	UPROPERTY(meta = (BindWidget))
 		class UCanvasPanel* InventoryCanvas;
-	// 현재 골드를 표시해 줄 텍스트
+	// 현재 골드(마석)를 표시해 줄 텍스트
 	UPROPERTY(meta = (BindWidget))
 		class UTextBlock* GoldText;
+	// 현재 신비의 크리스탈을 표시해 줄 텍스트
+	UPROPERTY(meta = (BindWidget))
+		class UTextBlock* CrystalText;
 	// 현재 비어있는 칸중 가장 작은 번호
 	UPROPERTY()
 		int CurrentIndex;
@@ -56,6 +59,7 @@ public:
 		void UIMoveStop();
 
 	void SetGoldValue(int _Gold);
+	void SetCrystalValue(int _Gold);
 	bool AddItemToInventory(class UItemData* _Item);
 	bool UsingItem(FName _ItemName);
 };

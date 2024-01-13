@@ -7,6 +7,31 @@
 #include "InputActionValue.h"
 #include "MyCharacter.generated.h"
 
+enum class EActionState : uint8 {
+	STATE_MovePossible = 1,
+	STATE_CameraRotatePossible = 2,
+	STATE_RecoverPossible = 4,
+	STATE_CancelPossible = 8,
+	STATE_Jump = 16,
+	STATE_Die = 32,
+};
+
+enum class EAttackStates : uint8 {
+	NONE = 0,
+	ATTACK_Dodge,
+	ATTACK_DodgePossible,
+	STATE_Dodge,
+	ATTACK_Sprint,
+	ATTACK_SprintPossible,
+	STATE_Sprint,
+	ATTACK_Charge,
+	STATE_Charge,
+	ATTACK_Charge1Possible,
+	ATTACK_Charge2Possible,
+	ATTACK_Combo,
+	ATTACK_ComboPossible,
+};
+
 UCLASS()
 class MYCPROJECT2_API AMyCharacter : public ACharacter
 {
@@ -97,9 +122,6 @@ public:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly)
 		bool IsRecoverMP;
 
-	// 타격이 가능한 시점인가?
-	UPROPERTY(VisibleAnywhere)
-		bool IsAttackAble = false;
 	// 타격 당한 적
 	UPROPERTY(VisibleAnywhere)
 		class AEnemyParent* TargetEnemy;
@@ -111,9 +133,9 @@ public:
 		float AttackRange;
 	UPROPERTY(VisibleAnywhere)
 		FVector AttackBox; // (세로, 가로, 거리) 캐릭이 바라보고 있는 방향 기준
-	// 이 스트링 값으로 현재 캐릭터의 상태를 나타내고 여러 상태가 겹쳐서 발생하지 않도록 한다.
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly)
-		FString ActionState;
+	// 이 값으로 현재 캐릭터의 상태를 나타내고 여러 상태가 겹쳐서 발생하지 않도록 한다.
+	int ActionState;
+	EAttackStates AttackStates;
 
 	// 업그레이드 변수들
 	UPROPERTY(VisibleAnywhere)
@@ -143,6 +165,9 @@ public:
 	// 아이템 추가 함수
 	UFUNCTION()
 		bool GetItem(class UItemData* _Item);
+	// 상점 창에대한 함수
+	UFUNCTION()
+		void ShopOnOff(bool _OnOff);
 
 protected:
 	// Called when the game starts or when spawned
@@ -162,6 +187,9 @@ private:
 	// 인벤토리 창에 대한 UI를 받아오는 변수
 	UPROPERTY(VisibleAnywhere, Category = UI)
 		class UInventoryWidget* UI_Inventory;
+	// 상점 창에 대한 UI를 받아오는 변수
+	UPROPERTY(VisibleAnywhere, Category = UI)
+		class UShopWidget* UI_Shop;
 	// 메인 HUD 창에 대한 UI를 받아오는 변수
 	TSubclassOf<class UUserWidget> UI_MainHUDClass;
 	UPROPERTY(VisibleAnywhere, Category = UI)
@@ -238,8 +266,6 @@ protected:
 	void UsingQuickSlot(const FInputActionValue& Value);
 	// UI닫는 키에 대한 IA
 	void CloseUI(const FInputActionValue& Value);
-	// 인벤토리 클릭 키에 대한 IA
-	void InventoryClick(const FInputActionValue& Value);
 	// 공격이 끝나면 실행되는 함수 -> 엔진과 상호작용을 해서 UFUNCTION을 붙여줘야함
 	UFUNCTION()
 		void AttackEnded(UAnimMontage* Montage, bool bInterrupted);

@@ -22,7 +22,7 @@ EBTNodeResult::Type UBTT_FindRandomPosition::ExecuteTask(UBehaviorTreeComponent&
 	if (nullptr == NavSystem) return EBTNodeResult::Failed;
 
 	AMyCharacter* TargetPlayer = Cast<AEnemyParent>(ControllingPawn)->TargetPlayer;
-	if (TargetPlayer && !(TargetPlayer->ActionState == "Die")) {
+	if (TargetPlayer && !(TargetPlayer->ActionState == static_cast<int>(EActionState::STATE_Die))) {
 		OwnerComp.GetBlackboardComponent()->SetValueAsVector(AEnemyAIController::KeyTargetPosition, TargetPlayer->GetActorLocation());
 		float TargetDistance = (ControllingPawn->GetActorLocation() - TargetPlayer->GetActorLocation()).Size();
 		if ((ControllingPawn->LDAttackRange > 0 && TargetDistance < ControllingPawn->LDAttackRange) ||
