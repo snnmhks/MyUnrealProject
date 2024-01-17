@@ -19,7 +19,7 @@ AMyLevelScript::AMyLevelScript() {
 
 void AMyLevelScript::BeginPlay() {
 	Super::BeginPlay();
-	//GetWorldTimerManager().SetTimer(SpawnTimerHandle, this, &AMyLevelScript::SpawnEnemy, 10, true, 0);
+	GetWorldTimerManager().SetTimer(SpawnTimerHandle, this, &AMyLevelScript::SpawnEnemy, 10, true, 0);
 	MyCharacter = Cast<AMyCharacter>(UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetPawn());
 }
 

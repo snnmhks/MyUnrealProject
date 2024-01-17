@@ -24,7 +24,7 @@ public:
 	UPROPERTY(meta = (BindWidget))
 		class UButton* AttackSpeed;
 	UPROPERTY(meta = (BindWidget))
-		class UButton* Defence;
+		class UButton* Defense;
 	UPROPERTY(meta = (BindWidget))
 		class UButton* Health;
 	UPROPERTY(meta = (BindWidget))
@@ -43,20 +43,52 @@ public:
 		class UTextBlock* UpgradeTitle;
 	UPROPERTY(meta = (BindWidget))
 		class UTextBlock* ExplainUpgrade;
+	UPROPERTY(meta = (BindWidget))
+		class UTextBlock* GoldText;
+	UPROPERTY(meta = (BindWidget))
+		class UTextBlock* CrystalText;
+	UPROPERTY(meta = (BindWidget))
+		class UTextBlock* UpgradeName;
+	UPROPERTY(meta = (BindWidget))
+		class UTextBlock* UpgradeText;
 	
 public:
 	UFUNCTION()
 		void DamageUpgrade();
 	UFUNCTION()
+		void AttackSpeedUpgrade();
+	UFUNCTION()
+		void DefenseUpgrade();
+	UFUNCTION()
+		void HealthUpgrade();
+	UFUNCTION()
+		void EnergyUpgrade();
+	UFUNCTION()
 		void EndUpgrade();
-	void SetExplainDamage();
-	void SetExplainAttackSpeed();
-	void SetExplainDefense();
-	void SetExplainHealth();
-	void SetExplainEnergy();
-	void SetExplainAutoAttack();
-	void SetExplainMoreGold();
-	void SetExplainMoreEnemy();
+	UFUNCTION()
+		void SetExplainDamage();
+	UFUNCTION()
+		void RemoveExplain();
+	UFUNCTION()
+		void SetExplainAttackSpeed();
+	UFUNCTION()
+		void SetExplainDefence();
+	UFUNCTION()
+		void SetExplainHealth();
+	UFUNCTION()
+		void SetExplainEnergy();
+	UFUNCTION()
+		void SetExplainAutoAttack();
+	UFUNCTION()
+		void SetExplainMoreGold();
+	UFUNCTION()
+		void SetExplainMoreEnemy();
+
+	UFUNCTION()
+		void SetGoldText();
+	UFUNCTION()
+		void SetCrystalText();
+	
 
 protected:
 	virtual void NativeOnInitialized() override;

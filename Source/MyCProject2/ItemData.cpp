@@ -15,7 +15,7 @@ UItemData::UItemData() {
 }
 
 void UItemData::SetItemData(FName _ItemName) {
-	FItemDataStructure* ItemDataStructures;
+	FItemDataStructure* ItemDataStructures = nullptr;
 	ItemDataStructures = ItemDataTable->FindRow<FItemDataStructure>(_ItemName, FString(""));
 	ItemImage = ItemDataStructures->ItemImage;
 	ItemName = ItemDataStructures->ItemName;

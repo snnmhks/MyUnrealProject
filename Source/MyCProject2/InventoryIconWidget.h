@@ -9,9 +9,8 @@
 /**
  * 
  */
-UENUM()
-enum ESlotType {
-	SLOT_Inventory = 0	UMETA(DisplayName = "Inventory slot"),
+enum class ESlotType : uint8 {
+	SLOT_Inventory		UMETA(DisplayName = "Inventory slot"),
 	SLOT_Quick			UMETA(DisplayName = "Quick slot")
 };
 
@@ -41,8 +40,7 @@ public:
 	// 아이템 갯수
 	UPROPERTY(meta = (BindWidget))
 		class UTextBlock* ItemNum;
-	UPROPERTY(VisibleAnywhere, BluePrintReadWrite)
-		TEnumAsByte<enum ESlotType> Type;
+	enum ESlotType Type;
 
 public:
 

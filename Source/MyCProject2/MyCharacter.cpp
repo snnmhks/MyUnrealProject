@@ -52,9 +52,7 @@ AMyCharacter::AMyCharacter()
 														// 현재 캐릭터의 상태를 표현
 														// 현재 캐릭터의 상태를 통해 여러 행동이 서로 간섭하지 않도록 하였다.
 	ComboNum = 1;										// 콤보 공격할 때 몇번째 콤보인지 나타낸다.
-	IsCombo = 0;										// 콤보 공격 키를 감지해서 다음 콤보 공격을 할 지 판단한다.
 	ChargeValue = 0;									// 헤비 공격의 차지 정도를 표현하는 수치
-	IsCharge = 0;										// 차지가 만족할 만큼 됐는지를 판단하여 다음 헤비 공격을 판단한다.
 	SkillCoolRate = 0.01f;								// 스킬 쿨타임 돌리는 함수를 몇초마다 한번씩 실행을 할 것인가
 	DamageValue = 0.0f;
 														// 
@@ -67,7 +65,7 @@ AMyCharacter::AMyCharacter()
 	AttackSpeed = 1.0f;
 	CoolTimeDown = 1.0f;
 	BaseDamage = 100.0f;
-	BaseGuard = 0.0f;
+	BaseDefense = 0.0f;
 	////////////////////////////////
 
 	// Component 생성
@@ -249,18 +247,17 @@ void AMyCharacter::SetSkillValue() {
 }
 
 void AMyCharacter::SetCharacterStateValue() {
-	FCharacterStateStruct* tmp;
+	FCharacterStateStruct* tmp = nullptr;
 	if (IsValid(CharacterStateTable)) {
 		tmp = CharacterStateTable->FindRow<FCharacterStateStruct>(FName(TEXT("Halberd")), FString(""));
 	}
 
-	CharacterState.Add("MaxHP", tmp->MaxHP);
-	CharacterState.Add("MaxMP", tmp->MaxMP);
+	MaxHP = tmp->MaxHP;
+	MaxMP = tmp->MaxMP;
 	CharacterState.Add("RecoveryHPValue", tmp->RecoveryHPValue);
 	CharacterState.Add("RecoveryMPValue", tmp->RecoveryMPValue);
-	CharacterState.Add("BaseDamage", tmp->BaseDamage);
-	CurrentHP = CharacterState.FindRef("MaxHP");
-	CurrentMP = CharacterState.FindRef("MaxMP");
+	CurrentHP = MaxHP;
+	CurrentMP = MaxMP;
 }
 
 // Called when the game starts or when spawned
@@ -314,17 +311,17 @@ void AMyCharacter::BeginPlay()
 			MyAnim->NextCombo(ComboNum, "Combo");
 			switch (ComboNum) {
 			case 2:
-				DamageValue = SkillData.FindRef("LSkillDamage2");
+				DamageValue = SkillData.FindRef("LSkillDamage2") + BaseDamage;
 				AttackRange = SkillData.FindRef("LSkillRange2");
 				AttackBox = SkillArea.FindRef("LSkillBox2");
 				break;
 			case 3:
-				DamageValue = SkillData.FindRef("LSkillDamage3");
+				DamageValue = SkillData.FindRef("LSkillDamage3") + BaseDamage;
 				AttackRange = SkillData.FindRef("LSkillRange3");
 				AttackBox = SkillArea.FindRef("LSkillBox3");
 				break;
 			case 4:
-				DamageValue = SkillData.FindRef("LSkillDamage4");
+				DamageValue = SkillData.FindRef("LSkillDamage4") + BaseDamage;
 				AttackRange = SkillData.FindRef("LSkillRange4");
 				AttackBox = SkillArea.FindRef("LSkillBox4");
 				break;
@@ -428,7 +425,7 @@ void AMyCharacter::BeginPlay()
 		Weapon->PlayEffect("Charge2");
 	});
 
-	ShopOnOff(true);
+	//ShopOnOff(true);
 }
 
 // Called every frame
@@ -490,6 +487,8 @@ void AMyCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 void AMyCharacter::ShopOnOff(bool _OnOff) {
 	if (_OnOff) {
 		UI_Shop->SetVisibility(ESlateVisibility::Visible);
+		UI_Shop->SetGoldText();
+		UI_Shop->SetCrystalText();
 		UI_Inventory->SetVisibility(ESlateVisibility::Collapsed);
 		UI_Skill->SetVisibility(ESlateVisibility::Collapsed);
 		MyController->SetShowMouseCursor(true);
@@ -592,15 +591,14 @@ void AMyCharacter::CameraZoom(const FInputActionValue& Value) {
 
 // HP 조절 함수
 void AMyCharacter::DiffHP(float _HP) {
-	float _MaxHP = CharacterState.FindRef("MaxHP");
-	if (_HP < 0) CurrentHP += _HP + BaseGuard;
+	if (_HP < 0) CurrentHP += _HP + BaseDefense;
 	else {
 		CurrentHP += _HP;
-		if (CurrentHP > _MaxHP) {
-			CurrentHP = _MaxHP;
+		if (CurrentHP > MaxHP) {
+			CurrentHP = MaxHP;
 		}
 	}
-	UI_Skill->HPBar->SetPercent(CurrentHP / _MaxHP);
+	UI_Skill->HPBar->SetPercent(CurrentHP / MaxHP);
 	if (CurrentHP <= 0) {
 		ActionState = static_cast<int>(EActionState::STATE_Die);
 		MyAnim->PlayMongtage("Die", 1.0f);
@@ -608,15 +606,14 @@ void AMyCharacter::DiffHP(float _HP) {
 }
 // MP 조절 함수
 void AMyCharacter::DiffMP(float _MP) {
-	float _MaxMP = CharacterState.FindRef("MaxMP");
 	// MP를 소비하면 MP자연 회복은 중단된다.
 	if (_MP < 0) {
 		IsRecoverMP = 0;
 		GetWorldTimerManager().ClearTimer(RecoverMPTimerHandle);
 	}
 	CurrentMP += _MP;
-	if (CurrentMP > _MaxMP) {
-		CurrentMP = _MaxMP;
+	if (CurrentMP > MaxMP) {
+		CurrentMP = MaxMP;
 		// MP가 최대치까지 올랐으면 자연 회복은 중단된다.
 		IsRecoverMP = 0;
 		GetWorldTimerManager().ClearTimer(RecoverMPTimerHandle);
@@ -626,22 +623,20 @@ void AMyCharacter::DiffMP(float _MP) {
 
 // HP 자연 회복 함수
 void AMyCharacter::NaturalRecoverHP() {
-	float _MaxHP = CharacterState.FindRef("MaxHP");
 	CurrentHP += CharacterState.FindRef("RecoveryHPValue");
-	if (CurrentHP > _MaxHP) {
-		CurrentHP = _MaxHP;
+	if (CurrentHP > MaxHP) {
+		CurrentHP = MaxHP;
 	}
-	UI_Skill->HPBar->SetPercent(CurrentHP / _MaxHP);
+	UI_Skill->HPBar->SetPercent(CurrentHP / MaxHP);
 }
 
 // MP 자연 회복 함수
 void AMyCharacter::NaturalRecoverMP() {
-	float _MaxMP = CharacterState.FindRef("MaxMP");
 	CurrentMP += CharacterState.FindRef("RecoveryMPValue");
-	if (CurrentMP > _MaxMP) {
-		CurrentMP = _MaxMP;
+	if (CurrentMP > MaxMP) {
+		CurrentMP = MaxMP;
 	}
-	UI_Skill->MPBar->SetPercent(CurrentMP / _MaxMP);
+	UI_Skill->MPBar->SetPercent(CurrentMP / MaxMP);
 }
 
 
@@ -709,6 +704,7 @@ void AMyCharacter::SprintAttack(const FInputActionValue& Value) {
 		DiffMP(-SkillData.FindRef("QMP"));
 		UI_Skill->ChargeBarActivate("Q");
 		UI_Skill->IconSizeDown("Q");
+		UI_Skill->ChangeTextBlockSize("Q", 45, false);
 		GetWorldTimerManager().SetTimer(QSkillTimerHandle, this, &AMyCharacter::QSkillCoolTime, SkillCoolRate, true, 0);
 		GetWorldTimerManager().SetTimer(QSkillRunTimerHandle, this, &AMyCharacter::QSkillRunTime, SkillCoolRate, true, 0);
 		MyAnim->PlayMongtage("Sprint", AttackSpeed);
@@ -724,6 +720,7 @@ void AMyCharacter::Dodge(const FInputActionValue& Value) {
 		DiffMP(-SkillData.FindRef("CMP"));
 		UI_Skill->MLActivate();
 		UI_Skill->IconSizeDown("C");
+		UI_Skill->ChangeTextBlockSize("C", 45, false);
 		GetWorldTimerManager().SetTimer(CSkillTimerHandle, this, &AMyCharacter::CSkillCoolTime, SkillCoolRate, true, 0);
 		MyAnim->PlayMongtage("Dodge", AttackSpeed);
 	}
@@ -739,6 +736,7 @@ void AMyCharacter::HeavyAttack(const FInputActionValue& Value) {
 		DiffMP(-SkillData.FindRef("MRMP"));
 		UI_Skill->ChargeBarActivate("MR");
 		UI_Skill->IconSizeDown("MR");
+		UI_Skill->ChangeTextBlockSize("MR", 26, false);
 		GetWorldTimerManager().SetTimer(MRSkillTimerHandle, this, &AMyCharacter::MRSkillCoolTime, SkillCoolRate, true, 0);
 		GetWorldTimerManager().SetTimer(MRSkillChargeTimerHandle, this, &AMyCharacter::MRSkillChargeTime, SkillCoolRate, true, 0);
 		CameraRotateScale = 0.1f;
@@ -776,6 +774,7 @@ void AMyCharacter::QSkillCoolTime() {
 	if (QSkillCoolValue >= MaxTime) {
 		QSkillCoolValue = 0.f;
 		UI_Skill->IconSizeUp("Q");
+		UI_Skill->ChangeTextBlockSize("Q", 60, true);
 		GetWorldTimerManager().ClearTimer(QSkillTimerHandle);
 	}
 }
@@ -787,6 +786,7 @@ void AMyCharacter::CSkillCoolTime() {
 	if (CSkillCoolValue >= MaxTime) {
 		CSkillCoolValue = 0.f;
 		UI_Skill->IconSizeUp("C");
+		UI_Skill->ChangeTextBlockSize("C", 60, true);
 		GetWorldTimerManager().ClearTimer(CSkillTimerHandle);
 	}
 }
@@ -798,6 +798,7 @@ void AMyCharacter::MRSkillCoolTime() {
 	if (MRSkillCoolValue >= MaxTime) {
 		MRSkillCoolValue = 0.f;
 		UI_Skill->IconSizeUp("MR");
+		UI_Skill->ChangeTextBlockSize("MR", 35, true);
 		GetWorldTimerManager().ClearTimer(MRSkillTimerHandle);
 	}
 }
@@ -841,6 +842,11 @@ void AMyCharacter::Diying() {
 void AMyCharacter::GoldDiff(int _Gold) {
 	UserGold += _Gold;
 	UI_Inventory->SetGoldValue(UserGold);
+}
+
+void AMyCharacter::CrystalDiff(int _Crystal) {
+	UserCrystal += _Crystal;
+	UI_Inventory->SetCrystalValue(UserCrystal);
 }
 
 bool AMyCharacter::GetItem(UItemData* _Item) {

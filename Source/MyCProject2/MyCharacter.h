@@ -116,10 +116,6 @@ public:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly)
 		int ComboNum;
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly)
-		bool IsCombo;
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly)
-		int IsCharge;
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly)
 		bool IsRecoverMP;
 
 	// 타격 당한 적
@@ -145,9 +141,15 @@ public:
 	UPROPERTY(VisibleAnywhere)
 		float BaseDamage;
 	UPROPERTY(VisibleAnywhere)
-		float BaseGuard;
+		float BaseDefense;
+	UPROPERTY(VisibleAnywhere)
+		float MaxHP;
+	UPROPERTY(VisibleAnywhere)
+		float MaxMP;
 	UPROPERTY(VisibleAnywhere)
 		float UserGold;
+	UPROPERTY(VisibleAnywhere)
+		float UserCrystal;
 
 public:
 	// Sets default values for this character's properties
@@ -162,6 +164,8 @@ public:
 	// 골드 조절 함수
 	UFUNCTION()
 		void GoldDiff(int _Gold);
+	UFUNCTION()
+		void CrystalDiff(int _Crystal);
 	// 아이템 추가 함수
 	UFUNCTION()
 		bool GetItem(class UItemData* _Item);

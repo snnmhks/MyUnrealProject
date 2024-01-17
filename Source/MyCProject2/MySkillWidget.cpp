@@ -23,7 +23,7 @@ void UMySkillWidget::NativeOnInitialized() {
 	}
 }
 
-void UMySkillWidget::ChargeBarActivate(FString Name) {
+void UMySkillWidget::ChargeBarActivate(FName Name) {
 	ChargeBar->SetPercent(0.f);
 	ChargeBar->SetVisibility(ESlateVisibility::Visible);
 	if (Name == "MR") {
@@ -48,33 +48,54 @@ void UMySkillWidget::MLDisable() {
 	MLText->SetVisibility(ESlateVisibility::Hidden);
 }
 
-void UMySkillWidget::IconSizeDown(FString Name) {
+void UMySkillWidget::IconSizeDown(FName Name) {
 	if (Name == "Q") {
 		Cast<UCanvasPanelSlot>(QSkill->Slot.Get())->SetSize(FVector2D(60, 60));
-		//QText->SetFont(FSlateFontInfo());
 	}
 	else if (Name == "C") {
 		Cast<UCanvasPanelSlot>(CSkill->Slot.Get())->SetSize(FVector2D(60, 60));
-		//CText->Font.Size = 45;
 	}
 	else if (Name == "MR") {
 		Cast<UCanvasPanelSlot>(MRSkill->Slot.Get())->SetSize(FVector2D(60, 60));
-		//MRText->Font.Size = 26;
 	}
 }
 
-void UMySkillWidget::IconSizeUp(FString Name) {
+void UMySkillWidget::IconSizeUp(FName Name) {
 	if (Name == "Q") {
 		Cast<UCanvasPanelSlot>(QSkill->Slot.Get())->SetSize(FVector2D(80, 80));
-		//QText->Font.Size = 60;
 	}
 	else if (Name == "C") {
 		Cast<UCanvasPanelSlot>(CSkill->Slot.Get())->SetSize(FVector2D(80, 80));
-		//CText->Font.Size = 60;
 	}
 	else if (Name == "MR") {
 		Cast<UCanvasPanelSlot>(MRSkill->Slot.Get())->SetSize(FVector2D(80, 80));
-		//MRText->Font.Size = 35;
+	}
+}
+
+void UMySkillWidget::ChangeTextBlockSize(FName _Name, float _NewFontSize, bool UpDown) {
+	UTextBlock* YourTextBlock = nullptr;
+	if (_Name == "Q") {
+		YourTextBlock = QText;
+	}
+	else if (_Name == "C") {
+		YourTextBlock = CText;
+	}
+	else if (_Name == "MR") {
+		YourTextBlock = MRText;
+	}
+	
+	if (YourTextBlock)
+	{
+		if (UpDown) Cast<UCanvasPanelSlot>(YourTextBlock->Slot.Get())->SetSize(FVector2D(80, 80));
+		else  Cast<UCanvasPanelSlot>(YourTextBlock->Slot.Get())->SetSize(FVector2D(60, 60));
+		FSlateFontInfo FontInfo = YourTextBlock->Font;  // 현재 폰트 정보를 가져옵니다.
+		FontInfo.Size = _NewFontSize;  // 원하는 크기로 폰트 크기를 설정합니다.
+		YourTextBlock->SetFont(FontInfo);  // 변경된 폰트 정보를 TextBlock에 설정합니다.
+	}
+	else
+	{
+		// TextBlock을 찾지 못했을 경우 에러 메시지를 출력하거나 적절한 예외 처리를 수행하세요.
+		UE_LOG(LogTemp, Warning, TEXT("TextBlock을 찾을 수 없습니다."));
 	}
 }
 

@@ -158,6 +158,8 @@ void AEnemyParent::OnDamaged(float _Damage) {
 			Cast<AMyLevelScript>(GetWorld()->GetLevelScriptActor())->KilledEnemy();
 			ItemData = NewObject<UItemData>();
 			if (SetItemData()) TargetPlayer->GetItem(ItemData);
+			GiveCrystal();
+			GiveGold();
 			Cast<AEnemyAIController>(GetController())->StopBT();
 			EnemyAnim->StopCurrentMongtage();
 			EnemyAnim->PlayMongtage(DieMongtage);
@@ -179,7 +181,7 @@ float AEnemyParent::EnemyLDAttack() {
 }
 
 bool AEnemyParent::SetItemData() {
-	int tmp = 10;
+	int tmp = 100;
 	if (tmp > FMath::RandRange(0, 100)) {
 		ItemData->SetItemData(FName(TEXT("HPPortion")));
 		return true;
@@ -192,8 +194,14 @@ bool AEnemyParent::SetItemData() {
 }
 
 void AEnemyParent::GiveGold() {
-	if (30 < FMath::RandRange(0, 100)) {
+	if (30 > FMath::RandRange(0, 100)) {
 		TargetPlayer->GoldDiff(EnemyGold * AddGiveGold);
+	}
+}
+
+void AEnemyParent::GiveCrystal() {
+	if (1 > FMath::RandRange(0, 100)) {
+		TargetPlayer->CrystalDiff(1);
 	}
 }
 

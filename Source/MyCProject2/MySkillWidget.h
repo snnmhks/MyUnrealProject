@@ -58,12 +58,14 @@ public:
 public:
 	// 쿨타임일 때 확실하게 구분 할 수 있도록 아이콘 크기를 조절
 	UFUNCTION()
-		void IconSizeDown(FString Name);
+		void IconSizeDown(FName Name);
 	UFUNCTION()
-		void IconSizeUp(FString Name);
+		void IconSizeUp(FName Name);
+	UFUNCTION()
+		void ChangeTextBlockSize(FName _Name, float _NewFontSize, bool UpDown);
 	// 차지바를 특정 타이밍에 보여주고 할 일이 끝나면 안보이게 하는 함수
 	UFUNCTION()
-		void ChargeBarActivate(FString Name);
+		void ChargeBarActivate(FName Name);
 	UFUNCTION()
 		void ChargeBarDisable();
 	// 특정 스킬을 사용하면 ML아이콘을 활성화하여 상호작용 할 수 있게 하는 함수

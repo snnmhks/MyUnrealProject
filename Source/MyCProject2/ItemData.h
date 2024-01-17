@@ -10,6 +10,7 @@
  * 
  */
 
+
 UCLASS()
 class MYCPROJECT2_API UItemData : public UObject
 {
@@ -29,7 +30,7 @@ public:
 	UPROPERTY(VisibleAnywhere)
 		class UDataTable* ItemDataTable;
 	UPROPERTY(VisibleAnywhere, BluePrintReadWrite)
-		TEnumAsByte<enum EItemType> Type;
+		int Type;
 
 public:
 	void SetItemData(FName _ItemName);

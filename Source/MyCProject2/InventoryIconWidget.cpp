@@ -14,8 +14,6 @@
 #include "ItemDrag.h"
 #include "ItemData.h"
 
-enum ESlotType;
-
 void UInventoryIconWidget::NativeOnInitialized() {
 	Super::NativeOnInitialized();
 
@@ -38,6 +36,7 @@ void UInventoryIconWidget::SetItemData(UItemData* _Item) {
 
 void UInventoryIconWidget::ItemNumPlus() {
 	HaveItem->ItemNum++;
+	UE_LOG(LogTemp, Log, TEXT("%d"), HaveItem->ItemNum);
 	ItemNum->SetText(FText::FromString(FString::FromInt(HaveItem->ItemNum)));
 }
 
@@ -50,7 +49,7 @@ void UInventoryIconWidget::DeleteItem() {
 }
 
 void UInventoryIconWidget::UsingItem() {
-	if (HaveItem->Type != EItemType::ITEM_Useable) return;
+	if (HaveItem->Type != 1) return;
 	if (HaveItem->ItemName == "HPPortion") {
 		OwnerPlayer->DiffHP(50);
 	}
@@ -81,10 +80,10 @@ FReply UInventoryIconWidget::NativeOnMouseButtonDown(const FGeometry& InGeometry
 		}
 		else if (InMouseEvent.IsMouseButtonDown(EKeys::RightMouseButton)) {
 			switch (Type) {
-			case SLOT_Inventory:
+			case ESlotType::SLOT_Inventory:
 				ParentInventory->ParentWidget->UsingItemQuickSlot(HaveItem->ItemName);
 				break;
-			case SLOT_Quick:
+			case ESlotType::SLOT_Quick:
 				ParentSkill->ParentWidget->UsingItemInventory(HaveItem->ItemName);
 				break;
 			}
@@ -110,7 +109,7 @@ bool UInventoryIconWidget::NativeOnDrop(const FGeometry& InGeoMetry, const FDrag
 
 	UItemDrag* Oper = Cast<UItemDrag>(OutOperation);
 	switch (this->Type) {
-	case SLOT_Inventory:
+	case ESlotType::SLOT_Inventory:
 		SwapItemData(Oper->DragItem, this);
 
 		this->SetItemData();
@@ -119,8 +118,10 @@ bool UInventoryIconWidget::NativeOnDrop(const FGeometry& InGeoMetry, const FDrag
 
 		return true;
 		break;
-	case SLOT_Quick:
-		if (this->HaveItem->Type == EItemType::ITEM_Useable) {
+	case ESlotType::SLOT_Quick:
+		UE_LOG(LogTemp, Log, TEXT("Drop detected"));
+		if (Oper->DragItem->HaveItem->Type == 1) {
+			UE_LOG(LogTemp, Log, TEXT("Type detected"));
 			this->HaveItem->SetItemData(Oper->DragItem->HaveItem);
 			this->SetItemData();
 		}

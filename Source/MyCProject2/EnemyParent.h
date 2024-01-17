@@ -104,6 +104,7 @@ public:
 	// 아이템 줄 때 호출할 함수
 	bool SetItemData();
 	void GiveGold();
+	void GiveCrystal();
 
 	// 죽으면 호출할 함수
 	void Diying();

@@ -11,8 +11,8 @@
  */
 
 UENUM(BlueprintType)
-enum EItemType {
-	ITEM_None = 0		UMETA(DisplayName = "None"),
+enum class EItemType : uint8 {
+	ITEM_None			UMETA(DisplayName = "None"),
 	ITEM_Useable		UMETA(DisplayName = "Useable"),
 	ITEM_Equipment		UMETA(DisplayName = "Equipment")
 };
@@ -27,5 +27,5 @@ struct FItemDataStructure : public FTableRowBase
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		FName ItemName;
 	UPROPERTY(EditAnywhere, BluePrintReadWrite)
-		TEnumAsByte<enum EItemType> Type;
+		int Type;
 };
