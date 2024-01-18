@@ -390,7 +390,7 @@ void AMyCharacter::BeginPlay()
 				AEnemyParent* SweepEnemy = Cast<AEnemyParent>(SweepActor.GetActor());
 				if (SweepEnemy && !BeforeName.Contains(SweepEnemy->GetName()) && SweepEnemy->IsDying == 0) {
 					BeforeName.Add(SweepEnemy->GetName());
-					Weapon->PlayEffect("Hit", SweepActor.ImpactPoint);
+					Weapon->PlayEffect("Hit", SweepActor.ImpactPoint, SweepActor.ImpactNormal.Rotation());
 					SweepEnemy->OnDamaged(DamageValue);
 				}
 			}

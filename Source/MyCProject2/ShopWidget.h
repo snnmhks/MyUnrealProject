@@ -52,6 +52,9 @@ public:
 	UPROPERTY(meta = (BindWidget))
 		class UTextBlock* UpgradeText;
 	
+	UPROPERTY(BlueprintReadOnly, Transient, meta = (BindWidgetAnim))
+		class UWidgetAnimation* SOF;
+
 public:
 	UFUNCTION()
 		void DamageUpgrade();

@@ -45,5 +45,5 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	void PlayEffect(FName _Name);
-	void PlayEffect(FName _Name, FVector SpawnLocation);
+	void PlayEffect(FName _Name, FVector SpawnLocation, FRotator SpawnRotator);
 };

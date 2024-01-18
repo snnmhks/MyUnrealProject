@@ -49,7 +49,9 @@ void UShopWidget::DamageUpgrade() {
 		MyPlayer->GoldDiff(-20);
 		SetGoldText();
 		if (50 > FMath::RandRange(0, 100)) {
+			PlayAnimation(SOF);
 			MyPlayer->BaseDamage += 5;
+			UpgradeText->SetText(FText::FromString(FString::FromInt(MyPlayer->BaseDamage)));
 		}
 	}
 }
@@ -59,7 +61,9 @@ void UShopWidget::AttackSpeedUpgrade() {
 		MyPlayer->GoldDiff(-20);
 		SetGoldText();
 		if (10 > FMath::RandRange(0, 100)) {
+			PlayAnimation(SOF);
 			MyPlayer->AttackSpeed += 0.1;
+			UpgradeText->SetText(FText::FromString(FString::FromInt(MyPlayer->AttackSpeed)));
 		}
 	}
 }
@@ -69,7 +73,9 @@ void UShopWidget::DefenseUpgrade() {
 		MyPlayer->GoldDiff(-20);
 		SetGoldText();
 		if (50 > FMath::RandRange(0, 100)) {
+			PlayAnimation(SOF);
 			MyPlayer->BaseDefense += 1;
+			UpgradeText->SetText(FText::FromString(FString::FromInt(MyPlayer->BaseDefense)));
 		}
 	}
 }
@@ -79,7 +85,9 @@ void UShopWidget::HealthUpgrade() {
 		MyPlayer->GoldDiff(-20);
 		SetGoldText();
 		if (50 > FMath::RandRange(0, 100)) {
+			PlayAnimation(SOF);
 			MyPlayer->MaxHP += 10;
+			UpgradeText->SetText(FText::FromString(FString::FromInt(MyPlayer->MaxHP)));
 		}
 	}
 }
@@ -89,7 +97,9 @@ void UShopWidget::EnergyUpgrade() {
 		MyPlayer->GoldDiff(-20);
 		SetGoldText();
 		if (50 > FMath::RandRange(0, 100)) {
+			PlayAnimation(SOF);
 			MyPlayer->MaxMP += 10;
+			UpgradeText->SetText(FText::FromString(FString::FromInt(MyPlayer->MaxMP)));
 		}
 	}
 }

@@ -66,8 +66,8 @@ void AMyWeapon::PlayEffect(FName _Name) {
 	}
 }
 
-void AMyWeapon::PlayEffect(FName _Name, FVector SpawnLocation) {
+void AMyWeapon::PlayEffect(FName _Name, FVector SpawnLocation, FRotator SpawnRotator) {
 	if (_Name == "Hit") {
-		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitEffect, SpawnLocation, FRotator::ZeroRotator, FVector(3.f));
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitEffect, SpawnLocation, SpawnRotator, FVector(3.f));
 	}
 }
