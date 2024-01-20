@@ -104,7 +104,7 @@ void AEnemyParent::BeginPlay()
 					SweepCharacter->DiffHP(-EnemyDamage);
 				}
 			}
-
+/*
 #if ENABLE_DRAW_DEBUG
 			FVector TraceVector = GetActorForwardVector() * ARange;
 			FVector Center = GetActorLocation() + TraceVector * 0.5f;
@@ -124,6 +124,7 @@ void AEnemyParent::BeginPlay()
 				DebugTime
 				);
 #endif
+*/
 		});
 	}
 
@@ -181,7 +182,7 @@ float AEnemyParent::EnemyLDAttack() {
 }
 
 bool AEnemyParent::SetItemData() {
-	int tmp = 100;
+	int tmp = 10;
 	if (tmp > FMath::RandRange(0, 100)) {
 		ItemData->SetItemData(FName(TEXT("HPPortion")));
 		return true;

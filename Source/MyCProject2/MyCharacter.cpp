@@ -8,6 +8,7 @@
 #include "MainHUDWidget.h"
 #include "ShopWidget.h"
 #include "InventoryWidget.h"
+#include "GameStartWidget.h"
 #include "SkillDataStruct.h"
 #include "ItemData.h"
 #include "CharacterStateStruct.h"
@@ -64,8 +65,12 @@ AMyCharacter::AMyCharacter()
 	// 업그레이드 변수
 	AttackSpeed = 1.0f;
 	CoolTimeDown = 1.0f;
-	BaseDamage = 100.0f;
+	BaseDamage = 0.0f;
 	BaseDefense = 0.0f;
+	UserGold = 0;
+
+	//
+	IsRecoverMP = 0;
 	////////////////////////////////
 
 	// Component 생성
@@ -119,6 +124,11 @@ AMyCharacter::AMyCharacter()
 		TEXT("WidgetBlueprint'/Game/UI/UI_MainHUD'"));
 	if (UI_MAINHUD.Succeeded()) {
 		UI_MainHUDClass = UI_MAINHUD.Class;
+	}
+	static ConstructorHelpers::FClassFinder<UGameStartWidget> UI_GAMESTART(
+		TEXT("WidgetBlueprint'/Game/UI/UI_GameStart'"));
+	if (UI_GAMESTART.Succeeded()) {
+		UI_GameStartClass = UI_GAMESTART.Class;
 	}
 
 	// 무기 생성
@@ -274,6 +284,13 @@ void AMyCharacter::BeginPlay()
 	SetCharacterStateValue();
 
 	// UI 화면에 추가
+	if (UI_GameStartClass) {
+		UI_GameStart = Cast<UGameStartWidget>(CreateWidget(GetWorld(), UI_GameStartClass));
+		UI_GameStart->AddToViewport();
+		MyController->SetPause(true);
+		MyController->SetShowMouseCursor(true);
+		MyController->SetInputMode(FInputModeUIOnly());
+	}
 	if (IsValid(UI_MainHUDClass)) {
 		UI_MainHUD = Cast<UMainHUDWidget>(CreateWidget(GetWorld(), UI_MainHUDClass));
 		UI_MainHUD->AddToViewport();
@@ -281,6 +298,7 @@ void AMyCharacter::BeginPlay()
 		UI_Inventory = UI_MainHUD->UI_Inventory;
 		UI_Shop = UI_MainHUD->UI_Shop;
 	}
+
 
 	// 무기 매쉬 생성 
 	Weapon = GetWorld()->SpawnActor<AMyWeapon>(WeaponCalss);
@@ -291,10 +309,10 @@ void AMyCharacter::BeginPlay()
 	//else UE_LOG(LogTemp, Log, TEXT("Hello"));
 
 	// 이 캐릭터의 컨트롤러를 가져와서 IMC 맵핑을 한다.
-	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
+	if (MyController)
 	{
 		if (UEnhancedInputLocalPlayerSubsystem* SubSystem =
-			ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
+			ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(MyController->GetLocalPlayer()))
 			SubSystem->AddMappingContext(DefaultContext, 0);
 	}
 	// 캐릭터의 애니메이션을 따로 저장해둬서 필요할 때 호출한다.
@@ -395,7 +413,7 @@ void AMyCharacter::BeginPlay()
 				}
 			}
 		}
-
+/*
 #if ENABLE_DRAW_DEBUG
 		FVector TraceVector = GetActorForwardVector() * AttackRange;
 		FVector Center = GetActorLocation() + TraceVector * 0.5f + GetActorForwardVector() * AttackBox.Z;
@@ -415,6 +433,7 @@ void AMyCharacter::BeginPlay()
 			DebugTime
 		);
 #endif
+*/
 	});
 
 	MyAnim->OnAttackDisable.AddLambda([this]()->void {
@@ -444,7 +463,7 @@ void AMyCharacter::Tick(float DeltaTime)
 			MyAnim->JumpToLanding();
 		}
 	}
-	if (ActionState & static_cast<int>(EActionState::STATE_RecoverPossible) && CurrentMP < CharacterState.FindRef("MaxMP") && IsRecoverMP == 0) {
+	if (ActionState & static_cast<int>(EActionState::STATE_RecoverPossible) && CurrentMP < MaxMP && IsRecoverMP == 0) {
 		IsRecoverMP = 1;
 		GetWorldTimerManager().SetTimer(RecoverMPTimerHandle, this, &AMyCharacter::NaturalRecoverMP, 1, true, 5);
 	}
@@ -493,6 +512,11 @@ void AMyCharacter::ShopOnOff(bool _OnOff) {
 		UI_Skill->SetVisibility(ESlateVisibility::Collapsed);
 		MyController->SetShowMouseCursor(true);
 		MyController->SetInputMode(FInputModeUIOnly());
+		if (UEnhancedInputLocalPlayerSubsystem* SubSystem =
+			ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(MyController->GetLocalPlayer()))
+			SubSystem->RemoveMappingContext(DefaultContext);
+		MoveValue.X = 0;
+		MoveValue.Y = 0;
 	}
 	else {
 		UI_Shop->SetVisibility(ESlateVisibility::Collapsed);
@@ -500,7 +524,18 @@ void AMyCharacter::ShopOnOff(bool _OnOff) {
 		UI_Skill->SetVisibility(ESlateVisibility::Visible);
 		MyController->SetShowMouseCursor(false);
 		MyController->SetInputMode(FInputModeGameOnly());
+		if (UEnhancedInputLocalPlayerSubsystem* SubSystem =
+			ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(MyController->GetLocalPlayer()))
+			SubSystem->AddMappingContext(DefaultContext, 0);
 	}
+}
+
+void AMyCharacter::RemoveGameStartWindow() {
+	UI_GameStart->RemoveFromParent();
+	MyController->SetPause(false);
+	MyController->SetShowMouseCursor(false);
+	MyController->SetInputMode(FInputModeGameOnly());
+	UI_Skill->SetVisibility(ESlateVisibility::Visible);
 }
 
 // 바인딩 한 IA를 여기서 작업
@@ -618,7 +653,7 @@ void AMyCharacter::DiffMP(float _MP) {
 		IsRecoverMP = 0;
 		GetWorldTimerManager().ClearTimer(RecoverMPTimerHandle);
 	}
-	UI_Skill->MPBar->SetPercent(CurrentMP / CharacterState.FindRef("MaxMP"));
+	UI_Skill->MPBar->SetPercent(CurrentMP / MaxMP);
 }
 
 // HP 자연 회복 함수
@@ -663,7 +698,8 @@ void AMyCharacter::InventoryOnOff(const FInputActionValue& Value) {
 void AMyCharacter::ComboAttack(const FInputActionValue& Value) {
 	if (AttackStates == EAttackStates::NONE) {
 		AttackStates = EAttackStates::ATTACK_Combo;
-		ActionState = static_cast<int>(EActionState::STATE_CancelPossible);
+		ActionState = static_cast<int>(EActionState::STATE_CancelPossible) +
+			static_cast<int>(EActionState::STATE_RecoverPossible);
 		MyAnim->PlayMongtage("Combo", AttackSpeed);
 		DamageValue = SkillData.FindRef("LSkillDamage1") + BaseDamage;
 		AttackRange = SkillData.FindRef("LSkillRange1");
@@ -746,6 +782,7 @@ void AMyCharacter::HeavyAttack(const FInputActionValue& Value) {
 
 void AMyCharacter::HeavyEnd(const FInputActionValue& Value) {
 	GetWorldTimerManager().ClearTimer(MRSkillChargeTimerHandle);
+	UI_Skill->ChargeBarDisable();
 	if (AttackStates == EAttackStates::ATTACK_Charge1Possible || 
 		AttackStates == EAttackStates::ATTACK_Charge2Possible) {
 		MyAnim->JumpToHeavy1();
@@ -851,4 +888,9 @@ void AMyCharacter::CrystalDiff(int _Crystal) {
 
 bool AMyCharacter::GetItem(UItemData* _Item) {
 	return UI_Inventory->AddItemToInventory(_Item);
+}
+
+void AMyCharacter::SetRoundTime(int _Minite, int _Second) {
+	UI_Skill->SetRoundTimerMinite(_Minite);
+	UI_Skill->SetRoundTimerSecond(_Second);
 }

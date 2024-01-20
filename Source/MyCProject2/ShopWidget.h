@@ -51,6 +51,10 @@ public:
 		class UTextBlock* UpgradeName;
 	UPROPERTY(meta = (BindWidget))
 		class UTextBlock* UpgradeText;
+	UPROPERTY(meta = (BindWidget))
+		class UTextBlock* SuccessPercentText;
+	UPROPERTY(meta = (BindWidget))
+		class UTextBlock* SuccessOrFail;
 	
 	UPROPERTY(BlueprintReadOnly, Transient, meta = (BindWidgetAnim))
 		class UWidgetAnimation* SOF;
@@ -87,10 +91,9 @@ public:
 	UFUNCTION()
 		void SetExplainMoreEnemy();
 
-	UFUNCTION()
-		void SetGoldText();
-	UFUNCTION()
-		void SetCrystalText();
+	void SetGoldText();
+	void SetCrystalText();
+	void SetSOFText(bool _SOF);
 	
 
 protected:

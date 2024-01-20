@@ -119,3 +119,31 @@ FName UMySkillWidget::UsingItem(int _Index) {
 	}
 	return EName::None;
 }
+
+void UMySkillWidget::SetRoundTimerSecond(int _Second) {
+	if (_Second < 10) {
+		RoundTimeSecond->SetText(FText::Format(LOCTEXT("0", "0{0}"), _Second));
+	}
+	else {
+		RoundTimeSecond->SetText(FText::AsNumber(_Second));;
+	}
+}
+
+void UMySkillWidget::SetRoundTimerMinite(int _Minite) {
+	if (_Minite < 10) {
+		RoundTimeMinite->SetText(FText::Format(LOCTEXT("0","0{0}"), _Minite));
+	}
+	else {
+		RoundTimeMinite->SetText(FText::AsNumber(_Minite));;
+	}
+}
+
+void UMySkillWidget::QuickSlotItemNumPlus(FName _ItemName) {
+	for (UWidget* ItemSlot : QuickSlotPanel->GetAllChildren()) {
+		UInventoryIconWidget* tmp = Cast<UInventoryIconWidget>(ItemSlot);
+		if (tmp->HaveItem->ItemName == _ItemName) {
+			tmp->ItemNumPlus();
+			return;
+		}
+	}
+}

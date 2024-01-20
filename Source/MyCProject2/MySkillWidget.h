@@ -54,6 +54,11 @@ public:
 		class UProgressBar* HPBar;
 	UPROPERTY(meta = (BindWidget))
 		class UProgressBar* MPBar;
+	// 라운드 타이머 위젯
+	UPROPERTY(meta = (BindWidget))
+		class UTextBlock* RoundTimeSecond;
+	UPROPERTY(meta = (BindWidget))
+		class UTextBlock* RoundTimeMinite;
 
 public:
 	// 쿨타임일 때 확실하게 구분 할 수 있도록 아이콘 크기를 조절
@@ -74,6 +79,9 @@ public:
 	UFUNCTION()
 		void MLDisable();
 
+	void QuickSlotItemNumPlus(FName _ItemName);
+	void SetRoundTimerSecond(int _Second);
+	void SetRoundTimerMinite(int _Minite);
 	bool UsingItem(FName _ItemName);
 	FName UsingItem(int _Index);
 

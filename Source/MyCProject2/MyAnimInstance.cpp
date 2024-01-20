@@ -87,10 +87,6 @@ void UMyAnimInstance::AnimNotify_AttackDisable() {
 	OnAttackDisable.Broadcast();
 }
 
-void UMyAnimInstance::AnimNotify_DodgeAttackAble() {
-	OnAttackAble.Broadcast();
-}
-
 void UMyAnimInstance::AnimNotify_DodgeAttackDisable() {
 	OnAttackDisable.Broadcast();
 }

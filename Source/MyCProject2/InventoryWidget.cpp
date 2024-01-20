@@ -2,6 +2,8 @@
 
 
 #include "InventoryWidget.h"
+#include "MainHUDWidget.h"
+#include "MySkillWidget.h"
 #include "Components/Button.h"
 #include "Components/CanvasPanel.h"
 #include "Components/CanvasPanelSlot.h"
@@ -65,6 +67,7 @@ bool UInventoryWidget::AddItemToInventory(UItemData* _Item) {
 	// 이미 존재하는 아이템이 추가된 경우
 	if (CheckItemList.Contains(_Item->ItemName)) {
 		CheckItemList.FindRef(_Item->ItemName)->ItemNumPlus();
+		ParentWidget->UI_SkillWidget->QuickSlotItemNumPlus(_Item->ItemName);
 	}
 	else {
 		for (UWidget* ItemSlot : InventoryPanel->GetAllChildren()) {

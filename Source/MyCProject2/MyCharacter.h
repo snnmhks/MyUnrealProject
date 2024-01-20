@@ -7,6 +7,7 @@
 #include "InputActionValue.h"
 #include "MyCharacter.generated.h"
 
+// 캐릭터의 상태를 구분짓기 위해 가져온 enum
 enum class EActionState : uint8 {
 	STATE_MovePossible = 1,
 	STATE_CameraRotatePossible = 2,
@@ -111,10 +112,13 @@ public:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly)
 		FVector2D MoveValue;
 
+	// q스킬이 달리기를 할 때 사용할 변수
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly)
 		int DashValue;
+	// 콤보 공격이 몇단계인지 알기 위한 변수
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly)
 		int ComboNum;
+	// MP자연 회복을 구분할 변수
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly)
 		bool IsRecoverMP;
 
@@ -173,11 +177,15 @@ public:
 	UFUNCTION()
 		void ShopOnOff(bool _OnOff);
 
+	// 라운드 타이머 설정
+	void SetRoundTime(int _Minite, int Second);
+	// 최초 1회 게임 시작창 지우는 함수
+	void RemoveGameStartWindow();
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
@@ -198,6 +206,10 @@ private:
 	TSubclassOf<class UUserWidget> UI_MainHUDClass;
 	UPROPERTY(VisibleAnywhere, Category = UI)
 		class UMainHUDWidget* UI_MainHUD;
+	// 게임 시작 창에 대한 UI를 받아오는 변수
+	TSubclassOf<class UUserWidget> UI_GameStartClass;
+	UPROPERTY(VisibleAnywhere, Category = UI)
+		class UGameStartWidget* UI_GameStart;
 
 	// IMC 변수 설정
 	UPROPERTY(VisibleAnywhere, Category = Input)
@@ -245,7 +257,7 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = Weapon)
 		class AMyWeapon* Weapon;
 
-protected:
+private:
 	// 데이터 테이블에서 가져온 변수를 저장하는 함수
 	void SetSkillValue();
 	void SetCharacterStateValue();
@@ -270,6 +282,7 @@ protected:
 	void UsingQuickSlot(const FInputActionValue& Value);
 	// UI닫는 키에 대한 IA
 	void CloseUI(const FInputActionValue& Value);
+
 	// 공격이 끝나면 실행되는 함수 -> 엔진과 상호작용을 해서 UFUNCTION을 붙여줘야함
 	UFUNCTION()
 		void AttackEnded(UAnimMontage* Montage, bool bInterrupted);
