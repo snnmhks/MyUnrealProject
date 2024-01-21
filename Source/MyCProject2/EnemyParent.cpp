@@ -182,7 +182,7 @@ float AEnemyParent::EnemyLDAttack() {
 }
 
 bool AEnemyParent::SetItemData() {
-	int tmp = 10;
+	int tmp = 100;
 	if (tmp > FMath::RandRange(0, 100)) {
 		ItemData->SetItemData(FName(TEXT("HPPortion")));
 		return true;

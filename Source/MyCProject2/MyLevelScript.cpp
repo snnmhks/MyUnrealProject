@@ -54,6 +54,7 @@ void AMyLevelScript::SpawnEnemy() {
 void AMyLevelScript::KilledEnemy() {
 	KilledEnemyNum++;
 	if (KilledEnemyNum >= MaxSpawnNumInLevel) {
+		EnemyList.Empty();
 		KilledEnemyNum = 0;
 		SpawnEnemy();
 	}
@@ -70,8 +71,9 @@ void AMyLevelScript::RoundEnd() {
 	MyCharacter->ShopOnOff(true);
 	GetWorldTimerManager().ClearTimer(RoundTimerHandle);
 	for (AEnemyParent* EP : EnemyList) {
-		EP->Destroy();
+		if (IsValid(EP)) EP->Destroy();
 	}
+	EnemyList.Empty();
 }
 
 void AMyLevelScript::SetRoundTimer() {

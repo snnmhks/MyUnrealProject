@@ -30,10 +30,12 @@ protected:
 	virtual void NativeOnInitialized() override;
 
 public:
-	class UItemData* HaveItem;
-	class UInventoryWidget* ParentInventory;
-	class UMySkillWidget* ParentSkill;
-	class AMyCharacter* OwnerPlayer;
+	UPROPERTY()
+		class UItemData* HaveItem;
+	UPROPERTY()
+		class UInventoryWidget* ParentInventory;
+	UPROPERTY()
+		class UMySkillWidget* ParentSkill;
 	// 아이콘 이미지
 	UPROPERTY(meta = (BindWidget))
 		class UImage* IconImage;

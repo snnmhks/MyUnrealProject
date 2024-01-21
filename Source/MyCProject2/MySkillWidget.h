@@ -60,6 +60,8 @@ public:
 	UPROPERTY(meta = (BindWidget))
 		class UTextBlock* RoundTimeMinite;
 
+	TMap<FName, int> QuickSlotItems;
+
 public:
 	// 쿨타임일 때 확실하게 구분 할 수 있도록 아이콘 크기를 조절
 	UFUNCTION()

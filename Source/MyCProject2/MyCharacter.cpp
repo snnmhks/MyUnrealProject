@@ -65,7 +65,7 @@ AMyCharacter::AMyCharacter()
 	// 업그레이드 변수
 	AttackSpeed = 1.0f;
 	CoolTimeDown = 1.0f;
-	BaseDamage = 0.0f;
+	BaseDamage = 1000.0f;
 	BaseDefense = 0.0f;
 	UserGold = 0;
 

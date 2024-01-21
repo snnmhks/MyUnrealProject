@@ -18,7 +18,6 @@ void UInventoryIconWidget::NativeOnInitialized() {
 	Super::NativeOnInitialized();
 
 	HaveItem = NewObject<UItemData>();
-	OwnerPlayer = Cast<AMyCharacter>(UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetPawn());
 }
 
 void UInventoryIconWidget::SetItemData() {
@@ -36,12 +35,12 @@ void UInventoryIconWidget::SetItemData(UItemData* _Item) {
 
 void UInventoryIconWidget::ItemNumPlus() {
 	HaveItem->ItemNum++;
-	UE_LOG(LogTemp, Log, TEXT("%d"), HaveItem->ItemNum);
 	ItemNum->SetText(FText::FromString(FString::FromInt(HaveItem->ItemNum)));
 }
 
 void UInventoryIconWidget::DeleteItem() {
 	if (IsValid(ParentInventory)) ParentInventory->CheckItemList.Remove(HaveItem->ItemName);
+	if (IsValid(ParentSkill)) ParentSkill->QuickSlotItems.Remove(HaveItem->ItemName);
 	UItemData* tmp = NewObject<UItemData>();
 	HaveItem->SetItemData(tmp);
 	IconImage->SetBrushFromTexture(HaveItem->ItemImage);
@@ -50,6 +49,8 @@ void UInventoryIconWidget::DeleteItem() {
 
 void UInventoryIconWidget::UsingItem() {
 	if (HaveItem->Type != 1) return;
+
+	AMyCharacter* OwnerPlayer = Cast<AMyCharacter>(UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetPawn());
 	if (HaveItem->ItemName == "HPPortion") {
 		OwnerPlayer->DiffHP(50);
 	}
@@ -119,9 +120,9 @@ bool UInventoryIconWidget::NativeOnDrop(const FGeometry& InGeoMetry, const FDrag
 		return true;
 		break;
 	case ESlotType::SLOT_Quick:
-		UE_LOG(LogTemp, Log, TEXT("Drop detected"));
-		if (Oper->DragItem->HaveItem->Type == 1) {
-			UE_LOG(LogTemp, Log, TEXT("Type detected"));
+		if (Oper->DragItem->HaveItem->Type == 1 &&
+			!ParentSkill->QuickSlotItems.Contains(Oper->DragItem->HaveItem->ItemName)) {
+			ParentSkill->QuickSlotItems.Add(Oper->DragItem->HaveItem->ItemName, 1);
 			this->HaveItem->SetItemData(Oper->DragItem->HaveItem);
 			this->SetItemData();
 		}
