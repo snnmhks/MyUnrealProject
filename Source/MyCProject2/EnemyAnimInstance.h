@@ -26,6 +26,8 @@ public:
 	FOnAnimNotifyCheck SpawnCheck;
 	// 공격 타이밍을 확인하여 Sweep Trace를 발생시킬 델리게이트
 	FOnAnimNotifyCheck AttackCheck;
+	// 두번째 공격 때 플레이어를 향해 공격할 델리게이트
+	FOnAnimNotifyCheck TurnCheck;
 
 	// 지금 재생중인 몽타주
 	UPROPERTY(VisibleAnywhere)
@@ -49,8 +51,13 @@ public:
 	// 죽음 몽타주의 끝부분에 도달하면 발생하는 노티파이
 	UFUNCTION()
 		void AnimNotify_EndDie();
+	// 스폰 몽타주가 끝나면 발생하는 노티파이
 	UFUNCTION()
 		void AnimNotify_SpawnFinish();
+	// 공격 타이밍에 발생하는 노티파이
 	UFUNCTION()
 		void AnimNotify_Attacking();
+	// 두번째 공격 타이밍에 발생하는 노티파이
+	UFUNCTION()
+		void AnimNotify_TurnToPlayer();
 };

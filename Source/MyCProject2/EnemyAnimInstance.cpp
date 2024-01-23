@@ -38,6 +38,10 @@ void UEnemyAnimInstance::AnimNotify_Attacking() {
 	AttackCheck.Broadcast();
 }
 
+void UEnemyAnimInstance::AnimNotify_TurnToPlayer() {
+	TurnCheck.Broadcast();
+}
+
 void UEnemyAnimInstance::StopCurrentMongtage() {
 	if (CurrentMongtage) Montage_Stop(0.0f, CurrentMongtage);
 }

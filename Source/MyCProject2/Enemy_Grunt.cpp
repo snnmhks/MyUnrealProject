@@ -43,7 +43,7 @@ AEnemy_Grunt::AEnemy_Grunt() {
 	// 타격 이펙트 생성
 	static ConstructorHelpers::FObjectFinder<UParticleSystem> HIT_EFFECT_MESH(
 		TEXT("ParticleSystem'/Game/InfinityBladeEffects/Effects/FX_Monsters/FX_Monster_SpiderBoss/Impact/P_Charge_Swing_01_Fire'"));
-	if (HIT_EFFECT_MESH.Succeeded()) HitEffect = HIT_EFFECT_MESH.Object;
+	if (HIT_EFFECT_MESH.Succeeded()) LDAttackEffect = HIT_EFFECT_MESH.Object;
 	static ConstructorHelpers::FObjectFinder<UParticleSystem> HITTED_EFFECT_MESH(
 		TEXT("ParticleSystem'/Game/InfinityBladeEffects/Effects/FX_Monsters/FX_Monster_Gruntling/Bomber/P_FireBombExplosion'"));
 	if (HITTED_EFFECT_MESH.Succeeded()) HittedEffect = HITTED_EFFECT_MESH.Object;
@@ -76,13 +76,17 @@ void AEnemy_Grunt::BeginPlay() {
 }
 
 void AEnemy_Grunt::PlayEffect() {
-	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitEffect, 
-		GetActorLocation() + GetActorForwardVector() * 100,
-		FRotator::ZeroRotator, FVector(1.f));
+	if (AS == EAttackState::LD_Attack) {
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), LDAttackEffect,
+			GetActorLocation() + GetActorForwardVector() * 100,
+			FRotator::ZeroRotator, FVector(1.f));
+	}
 }
 
 void AEnemy_Grunt::PlayHittedEffect(FVector SpawnLocation) {
-	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HittedEffect,
-		SpawnLocation,
-		FRotator::ZeroRotator, FVector(1.f));
+	if (AS == EAttackState::LD_Attack) {
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HittedEffect,
+			SpawnLocation,
+			FRotator::ZeroRotator, FVector(1.f));
+	}
 }

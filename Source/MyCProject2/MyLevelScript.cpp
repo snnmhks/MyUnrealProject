@@ -4,6 +4,7 @@
 #include "MyLevelScript.h"
 #include "MyCharacter.h"
 #include "MyCharacter.h"
+#include "Enemy_Wolf.h"
 #include "Enemy_Bear.h"
 #include "Enemy_Spider.h"
 #include "Enemy_Grunt.h"
@@ -32,12 +33,15 @@ void AMyLevelScript::SpawnEnemy() {
 				SpawnLocation.Y = k * 600 + 300 - 1500;
 				switch (GameLevel) {
 				case 1:
-					EnemyList.Add(GetWorld()->SpawnActor<AEnemy_Bear>(SpawnLocation, FRotator(0.0f, 180.0f, 0.0f)));
+					EnemyList.Add(GetWorld()->SpawnActor<AEnemy_Wolf>(SpawnLocation, FRotator(0.0f, 180.0f, 0.0f)));
 					break;
 				case 2:
-					EnemyList.Add(GetWorld()->SpawnActor<AEnemy_Spider>(SpawnLocation, FRotator(0.0f, 180.0f, 0.0f)));
+					EnemyList.Add(GetWorld()->SpawnActor<AEnemy_Bear>(SpawnLocation, FRotator(0.0f, 180.0f, 0.0f)));
 					break;
 				case 3:
+					EnemyList.Add(GetWorld()->SpawnActor<AEnemy_Spider>(SpawnLocation, FRotator(0.0f, 180.0f, 0.0f)));
+					break;
+				case 4:
 					EnemyList.Add(GetWorld()->SpawnActor<AEnemy_Grunt>(SpawnLocation, FRotator(0.0f, 180.0f, 0.0f)));
 					break;
 				}
@@ -63,7 +67,7 @@ void AMyLevelScript::KilledEnemy() {
 void AMyLevelScript::RoundStart() {
 	SpawnEnemy();
 	RoundTimeSecond = 0;
-	RoundTimeMinite = 3;
+	RoundTimeMinite = 1;
 	GetWorldTimerManager().SetTimer(RoundTimerHandle, this, &AMyLevelScript::SetRoundTimer, 1, true, 0);
 }
 
@@ -74,6 +78,7 @@ void AMyLevelScript::RoundEnd() {
 		if (IsValid(EP)) EP->Destroy();
 	}
 	EnemyList.Empty();
+	KilledEnemyNum = 0;
 }
 
 void AMyLevelScript::SetRoundTimer() {

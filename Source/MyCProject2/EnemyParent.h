@@ -7,7 +7,7 @@
 #include "EnemyParent.generated.h"
 
 UENUM()
-enum AttackState {
+enum class EAttackState {
 	LD_Attack = 0,
 	Basic_Attack
 };
@@ -34,7 +34,7 @@ public:
 
 	float AddGiveGold;
 
-	AttackState AS;
+	EAttackState AS;
 
 	// 플레이어
 	UPROPERTY(VisibleAnywhere)

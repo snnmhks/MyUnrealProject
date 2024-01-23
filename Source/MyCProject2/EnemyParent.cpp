@@ -73,17 +73,23 @@ void AEnemyParent::BeginPlay()
 			Cast<AEnemyAIController>(GetController())->RunBT();
 		});
 
+		// 고개 돌리는 노티파이
+		EnemyAnim->TurnCheck.AddLambda([this]()->void {
+			FRotator TargetRotation = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), TargetPlayer->GetActorLocation());
+			SetActorRotation(TargetRotation);
+		});
+
 		// 공격 타이밍에 맞춰 sweep trace를 실행
 		EnemyAnim->AttackCheck.AddLambda([this]()->void {
 			PlayEffect();
 			float ARange = 0.0f;
 			float ARadius = 0.0f;
 			switch (AS) {
-			case Basic_Attack:
+			case EAttackState::Basic_Attack:
 				ARange = AttackRange;
 				ARadius = AttackRadius;
 				break;
-			case LD_Attack:
+			case EAttackState::LD_Attack:
 				ARange = LDAttackRange;
 				ARadius = LDAttackRadius;
 			}
@@ -171,18 +177,18 @@ void AEnemyParent::OnDamaged(float _Damage) {
 
 float AEnemyParent::EnemyAttack() {
 	if (!IsValid(AttackMontage1)) return 0.0f;
-	AS = Basic_Attack;
-	return EnemyAnim->Montage_Play(AttackMontage1, AttackSpeed);
+	AS = EAttackState::Basic_Attack;
+	return EnemyAnim->Montage_Play(AttackMontage1, AttackSpeed, EMontagePlayReturnType::Duration);
 }
 
 float AEnemyParent::EnemyLDAttack() {
 	if (!IsValid(LDAttackMontage1)) return 0.0f;
-	AS = LD_Attack;
-	return EnemyAnim->Montage_Play(LDAttackMontage1, AttackSpeed);
+	AS = EAttackState::LD_Attack;
+	return EnemyAnim->Montage_Play(LDAttackMontage1, AttackSpeed, EMontagePlayReturnType::Duration);
 }
 
 bool AEnemyParent::SetItemData() {
-	int tmp = 100;
+	int tmp = 10;
 	if (tmp > FMath::RandRange(0, 100)) {
 		ItemData->SetItemData(FName(TEXT("HPPortion")));
 		return true;

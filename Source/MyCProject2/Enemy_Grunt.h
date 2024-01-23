@@ -19,7 +19,7 @@ private:
 public:
 	// 타격시 이펙트
 	UPROPERTY(VisibleAnywhere)
-		class UParticleSystem* HitEffect;
+		class UParticleSystem* LDAttackEffect;
 	UPROPERTY(VisibleAnywhere)
 		class UParticleSystem* HittedEffect;
 public:

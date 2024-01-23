@@ -626,7 +626,9 @@ void AMyCharacter::CameraZoom(const FInputActionValue& Value) {
 
 // HP 조절 함수
 void AMyCharacter::DiffHP(float _HP) {
-	if (_HP < 0) CurrentHP += _HP + BaseDefense;
+	if (_HP < 0) {
+		if (BaseDefense < -_HP)	CurrentHP += _HP + BaseDefense;
+	}
 	else {
 		CurrentHP += _HP;
 		if (CurrentHP > MaxHP) {
