@@ -35,8 +35,6 @@ AEnemy_Bear::AEnemy_Bear() {
 	if (SPAWN_MONTAGE.Succeeded()) AttackMontage1 = ATTACK1_MONTAGE.Object;
 
 	AIControllerClass = AEnemyAIController::StaticClass();
-
-	GetCharacterMovement()->MaxWalkSpeed = 150;
 }
 
 void AEnemy_Bear::PostInitializeComponents() {
@@ -48,10 +46,11 @@ void AEnemy_Bear::PostInitializeComponents() {
 void AEnemy_Bear::BeginPlay() {
 	Super::BeginPlay();
 
+	GetCharacterMovement()->MaxWalkSpeed = 300;
 	EnemyMaxHP = 100;
 	EnemyCurrentHP = EnemyMaxHP;
 	EnemyDamage = 10;
-	EnemyGold = 10;
+	EnemyGold = 20;
 	AttackSpeed = 1.0f;
 	AttackRange = 200.0f;
 	AttackRadius = 50.0f;

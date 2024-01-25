@@ -13,7 +13,7 @@
 
 AMyLevelScript::AMyLevelScript() {
 	GameLevel = 1;
-	MaxSpawnNumInLevel = 5;
+	MaxSpawnNumInLevel = 10;
 }
 
 void AMyLevelScript::BeginPlay() {
@@ -22,7 +22,7 @@ void AMyLevelScript::BeginPlay() {
 }
 
 void AMyLevelScript::SpawnEnemy() {
-	float Percent = 0.5f;
+	float Percent = 0.3f;
 	int SpawnEnemyNum = 0;
 	// 랜덤 위치에 적을 소환
 	for (int j = 0; j < 4; j++) {
@@ -45,7 +45,7 @@ void AMyLevelScript::SpawnEnemy() {
 					EnemyList.Add(GetWorld()->SpawnActor<AEnemy_Grunt>(SpawnLocation, FRotator(0.0f, 180.0f, 0.0f)));
 					break;
 				}
-				Percent = 0.5f;
+				Percent = 0.3f;
 				SpawnEnemyNum++;
 				if (SpawnEnemyNum == MaxSpawnNumInLevel) break;
 			}

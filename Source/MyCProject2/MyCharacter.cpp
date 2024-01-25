@@ -68,6 +68,8 @@ AMyCharacter::AMyCharacter()
 	BaseDamage = 1000.0f;
 	BaseDefense = 0.0f;
 	UserGold = 0;
+	UserCrystal = 1;
+	AddGoldPercent = 1.0f;
 
 	//
 	IsRecoverMP = 0;
@@ -505,6 +507,12 @@ void AMyCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 
 void AMyCharacter::ShopOnOff(bool _OnOff) {
 	if (_OnOff) {
+		if (InvestedGold > 0) {
+			int PlusGold = FMath::RandRange(5, 15) * InvestedGold / 10;
+			UserGold += PlusGold;
+			InvestedGold = 0;
+			UE_LOG(LogTemp, Log, TEXT("%d"), PlusGold);
+		}
 		UI_Shop->SetVisibility(ESlateVisibility::Visible);
 		UI_Shop->SetGoldText();
 		UI_Shop->SetCrystalText();
@@ -878,9 +886,15 @@ void AMyCharacter::Diying() {
 	Destroy();
 }
 
-void AMyCharacter::GoldDiff(int _Gold) {
-	UserGold += _Gold;
-	UI_Inventory->SetGoldValue(UserGold);
+void AMyCharacter::GoldDiff(int _Gold, bool IsEnemy) {
+	if (IsEnemy) {
+		UserGold += _Gold * AddGoldPercent;
+		UI_Inventory->SetGoldValue(UserGold);
+	}
+	else {
+		UserGold += _Gold;
+		UI_Inventory->SetGoldValue(UserGold);
+	}
 }
 
 void AMyCharacter::CrystalDiff(int _Crystal) {

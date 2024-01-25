@@ -67,12 +67,14 @@ void AEnemy_Grunt::BeginPlay() {
 	EnemyMaxHP = 200;
 	EnemyCurrentHP = EnemyMaxHP;
 	EnemyDamage = 20;
+	EnemyLDDamage = 40;
 	EnemyGold = 50;
-	AttackSpeed = 1.0f;
-	AttackRange = 150.0f;
+	AttackSpeed = 1.5f;
+	LDAttackSpeed = 1.0f;
+	AttackRange = 200.0f;
 	AttackRadius = 50.0f;
 	LDAttackRange = 800.0f;
-	LDAttackRadius = 50.0f;
+	LDAttackRadius = 60.0f;
 }
 
 void AEnemy_Grunt::PlayEffect() {

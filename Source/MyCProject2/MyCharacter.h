@@ -138,22 +138,16 @@ public:
 	EAttackStates AttackStates;
 
 	// 업그레이드 변수들
-	UPROPERTY(VisibleAnywhere)
-		float AttackSpeed;
-	UPROPERTY(VisibleAnywhere)
-		float CoolTimeDown;
-	UPROPERTY(VisibleAnywhere)
-		float BaseDamage;
-	UPROPERTY(VisibleAnywhere)
-		float BaseDefense;
-	UPROPERTY(VisibleAnywhere)
-		float MaxHP;
-	UPROPERTY(VisibleAnywhere)
-		float MaxMP;
-	UPROPERTY(VisibleAnywhere)
-		float UserGold;
-	UPROPERTY(VisibleAnywhere)
-		float UserCrystal;
+	float AttackSpeed;
+	float CoolTimeDown;
+	float BaseDamage;
+	float BaseDefense;
+	float MaxHP;
+	float MaxMP;
+	int UserGold;
+	int UserCrystal;
+	int InvestedGold;
+	float AddGoldPercent;
 
 public:
 	// Sets default values for this character's properties
@@ -167,7 +161,7 @@ public:
 		void DiffMP(float _MP);
 	// 골드 조절 함수
 	UFUNCTION()
-		void GoldDiff(int _Gold);
+		void GoldDiff(int _Gold, bool IsEnemy = false);
 	UFUNCTION()
 		void CrystalDiff(int _Crystal);
 	// 아이템 추가 함수

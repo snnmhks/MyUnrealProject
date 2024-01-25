@@ -15,8 +15,6 @@ class MYCPROJECT2_API UShopWidget : public UUserWidget
 	GENERATED_BODY()
 	
 public:
-	// 플레이어
-	class AMyCharacter* MyPlayer;
 
 	// 업그레이드 버튼들
 	UPROPERTY(meta = (BindWidget))
@@ -37,6 +35,8 @@ public:
 		class UButton* MoreGold;
 	UPROPERTY(meta = (BindWidget))
 		class UButton* MoreEnemy;
+	UPROPERTY(meta = (BindWidget))
+		class UButton* Invest;
 	UPROPERTY(meta = (BindWidget))
 		class UCanvasPanel* ExpainWindow;
 	UPROPERTY(meta = (BindWidget))
@@ -73,6 +73,10 @@ public:
 	UFUNCTION()
 		void EndUpgrade();
 	UFUNCTION()
+		void InvestGold();
+	UFUNCTION()
+		void GoldUpgrade();
+	UFUNCTION()
 		void SetExplainDamage();
 	UFUNCTION()
 		void RemoveExplain();
@@ -90,6 +94,8 @@ public:
 		void SetExplainMoreGold();
 	UFUNCTION()
 		void SetExplainMoreEnemy();
+	UFUNCTION()
+		void SetExplainInvest();
 
 	void SetGoldText();
 	void SetCrystalText();

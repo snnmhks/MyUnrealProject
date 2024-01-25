@@ -35,8 +35,6 @@ AEnemy_Wolf::AEnemy_Wolf() {
 	if (ATTACK1_MONTAGE.Succeeded()) AttackMontage1 = ATTACK1_MONTAGE.Object;
 
 	AIControllerClass = AEnemyAIController::StaticClass();
-
-	GetCharacterMovement()->MaxWalkSpeed = 300;
 }
 
 void AEnemy_Wolf::PostInitializeComponents() {
@@ -48,6 +46,7 @@ void AEnemy_Wolf::PostInitializeComponents() {
 void AEnemy_Wolf::BeginPlay() {
 	Super::BeginPlay();
 
+	GetCharacterMovement()->MaxWalkSpeed = 150;
 	EnemyMaxHP = 50;
 	EnemyCurrentHP = EnemyMaxHP;
 	EnemyDamage = 5;

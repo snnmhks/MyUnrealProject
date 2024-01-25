@@ -12,8 +12,6 @@
 void UShopWidget::NativeOnInitialized() {
 	Super::NativeOnInitialized();
 
-	MyPlayer = Cast<AMyCharacter>(UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetPawn());
-
 	Damage->OnHovered.AddDynamic(this, &UShopWidget::SetExplainDamage);
 	Damage->OnUnhovered.AddDynamic(this, &UShopWidget::RemoveExplain);
 	Damage->OnPressed.AddDynamic(this, &UShopWidget::DamageUpgrade);
@@ -30,6 +28,10 @@ void UShopWidget::NativeOnInitialized() {
 	Health->OnUnhovered.AddDynamic(this, &UShopWidget::RemoveExplain);
 	Health->OnPressed.AddDynamic(this, &UShopWidget::HealthUpgrade);
 
+	Invest->OnHovered.AddDynamic(this, &UShopWidget::SetExplainInvest);
+	Invest->OnUnhovered.AddDynamic(this, &UShopWidget::RemoveExplain);
+	Invest->OnPressed.AddDynamic(this, &UShopWidget::InvestGold);
+
 	Energy->OnHovered.AddDynamic(this, &UShopWidget::SetExplainEnergy);
 	Energy->OnUnhovered.AddDynamic(this, &UShopWidget::RemoveExplain);
 	Energy->OnPressed.AddDynamic(this, &UShopWidget::EnergyUpgrade);
@@ -39,6 +41,7 @@ void UShopWidget::NativeOnInitialized() {
 
 	MoreGold->OnHovered.AddDynamic(this, &UShopWidget::SetExplainMoreGold);
 	MoreGold->OnUnhovered.AddDynamic(this, &UShopWidget::RemoveExplain);
+	MoreGold->OnPressed.AddDynamic(this, &UShopWidget::GoldUpgrade);
 
 	MoreEnemy->OnHovered.AddDynamic(this, &UShopWidget::SetExplainMoreEnemy);
 	MoreEnemy->OnUnhovered.AddDynamic(this, &UShopWidget::RemoveExplain);
@@ -47,6 +50,7 @@ void UShopWidget::NativeOnInitialized() {
 }
 
 void UShopWidget::DamageUpgrade() {
+	AMyCharacter *MyPlayer = Cast<AMyCharacter>(UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetPawn());
 	if (MyPlayer->UserGold >= 20) {
 		MyPlayer->GoldDiff(-20);
 		SetGoldText();
@@ -63,6 +67,7 @@ void UShopWidget::DamageUpgrade() {
 }
 
 void UShopWidget::AttackSpeedUpgrade() {
+	AMyCharacter* MyPlayer = Cast<AMyCharacter>(UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetPawn());
 	if (MyPlayer->UserGold >= 20) {
 		MyPlayer->GoldDiff(-20);
 		SetGoldText();
@@ -79,6 +84,7 @@ void UShopWidget::AttackSpeedUpgrade() {
 }
 
 void UShopWidget::DefenseUpgrade() {
+	AMyCharacter* MyPlayer = Cast<AMyCharacter>(UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetPawn());
 	if (MyPlayer->UserGold >= 20) {
 		MyPlayer->GoldDiff(-20);
 		SetGoldText();
@@ -95,6 +101,7 @@ void UShopWidget::DefenseUpgrade() {
 }
 
 void UShopWidget::HealthUpgrade() {
+	AMyCharacter* MyPlayer = Cast<AMyCharacter>(UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetPawn());
 	if (MyPlayer->UserGold >= 20) {
 		MyPlayer->GoldDiff(-20);
 		SetGoldText();
@@ -111,6 +118,7 @@ void UShopWidget::HealthUpgrade() {
 }
 
 void UShopWidget::EnergyUpgrade() {
+	AMyCharacter* MyPlayer = Cast<AMyCharacter>(UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetPawn());
 	if (MyPlayer->UserGold >= 20) {
 		MyPlayer->GoldDiff(-20);
 		SetGoldText();
@@ -126,11 +134,32 @@ void UShopWidget::EnergyUpgrade() {
 	}
 }
 
+void UShopWidget::GoldUpgrade() {
+	AMyCharacter* MyPlayer = Cast<AMyCharacter>(UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetPawn());
+	if (MyPlayer->UserCrystal >= 1) {
+		MyPlayer->CrystalDiff(-1);
+		SetCrystalText();
+		MyPlayer->AddGoldPercent += 0.1f;
+		UpgradeText->SetText(FText::AsNumber(MyPlayer->AddGoldPercent));
+	}
+}
+
+void UShopWidget::InvestGold() {
+	AMyCharacter* MyPlayer = Cast<AMyCharacter>(UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetPawn());
+	if (MyPlayer->UserGold >= 10 && MyPlayer->InvestedGold < 100) {
+		MyPlayer->GoldDiff(-10);
+		MyPlayer->InvestedGold += 10;
+		SetGoldText();
+		UpgradeText->SetText(FText::AsNumber(MyPlayer->InvestedGold));
+	}
+}
+
 void UShopWidget::EndUpgrade() {
 	Cast<AMyLevelScript>(GetWorld()->GetLevelScriptActor())->EndShop();
 }
 
 void UShopWidget::SetExplainDamage() {
+	AMyCharacter* MyPlayer = Cast<AMyCharacter>(UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetPawn());
 	ExpainWindow->SetVisibility(ESlateVisibility::Visible);
 	SuccessPercentText->SetText(FText::AsNumber(50));
 	UpgradeTitle->SetText(FText::FromName("Damage"));
@@ -140,6 +169,7 @@ void UShopWidget::SetExplainDamage() {
 }
 
 void UShopWidget::SetExplainAttackSpeed() {
+	AMyCharacter* MyPlayer = Cast<AMyCharacter>(UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetPawn());
 	ExpainWindow->SetVisibility(ESlateVisibility::Visible);
 	SuccessPercentText->SetText(FText::AsNumber(20));
 	UpgradeTitle->SetText(FText::FromName("Attack Speed"));
@@ -149,6 +179,7 @@ void UShopWidget::SetExplainAttackSpeed() {
 }
 
 void UShopWidget::SetExplainDefence() {
+	AMyCharacter* MyPlayer = Cast<AMyCharacter>(UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetPawn());
 	ExpainWindow->SetVisibility(ESlateVisibility::Visible);
 	SuccessPercentText->SetText(FText::AsNumber(50));
 	UpgradeTitle->SetText(FText::FromName("Defence"));
@@ -158,6 +189,7 @@ void UShopWidget::SetExplainDefence() {
 }
 
 void UShopWidget::SetExplainHealth() {
+	AMyCharacter* MyPlayer = Cast<AMyCharacter>(UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetPawn());
 	ExpainWindow->SetVisibility(ESlateVisibility::Visible);
 	SuccessPercentText->SetText(FText::AsNumber(50));
 	UpgradeTitle->SetText(FText::FromName("Health"));
@@ -167,6 +199,7 @@ void UShopWidget::SetExplainHealth() {
 }
 
 void UShopWidget::SetExplainEnergy() {
+	AMyCharacter* MyPlayer = Cast<AMyCharacter>(UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetPawn());
 	ExpainWindow->SetVisibility(ESlateVisibility::Visible);
 	SuccessPercentText->SetText(FText::AsNumber(50));
 	UpgradeTitle->SetText(FText::FromName("Energy"));
@@ -185,12 +218,13 @@ void UShopWidget::SetExplainAutoAttack() {
 }
 
 void UShopWidget::SetExplainMoreGold() {
+	AMyCharacter* MyPlayer = Cast<AMyCharacter>(UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetPawn());
 	ExpainWindow->SetVisibility(ESlateVisibility::Visible);
 	SuccessPercentText->SetText(FText::AsNumber(100));
 	UpgradeTitle->SetText(FText::FromName("More Gold"));
 	ExplainUpgrade->SetText(FText::FromName("Gold acquisition amount increases by 10%"));
-	UpgradeName->SetText(FText::FromName("More Gold +="));
-	UpgradeText->SetText(FText::AsNumber(0));
+	UpgradeName->SetText(FText::FromName("More Gold ="));
+	UpgradeText->SetText(FText::AsNumber(MyPlayer->AddGoldPercent));
 }
 
 void UShopWidget::SetExplainMoreEnemy() {
@@ -202,11 +236,23 @@ void UShopWidget::SetExplainMoreEnemy() {
 	UpgradeText->SetText(FText::AsNumber(0));
 }
 
+void UShopWidget::SetExplainInvest() {
+	AMyCharacter* MyPlayer = Cast<AMyCharacter>(UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetPawn());
+	ExpainWindow->SetVisibility(ESlateVisibility::Visible);
+	SuccessPercentText->SetText(FText::AsNumber(100));
+	UpgradeTitle->SetText(FText::FromName("Invest"));
+	ExplainUpgrade->SetText(FText::FromName("Heart Stone += Invest * (0.5 ~ 1.5)"));
+	UpgradeName->SetText(FText::FromName("Invest ="));
+	UpgradeText->SetText(FText::AsNumber(MyPlayer->InvestedGold));
+}
+
 void UShopWidget::SetGoldText() {
+	AMyCharacter* MyPlayer = Cast<AMyCharacter>(UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetPawn());
 	GoldText->SetText(FText::AsNumber(MyPlayer->UserGold));
 }
 
 void UShopWidget::SetCrystalText() {
+	AMyCharacter* MyPlayer = Cast<AMyCharacter>(UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetPawn());
 	CrystalText->SetText(FText::AsNumber(MyPlayer->UserCrystal));
 }
 

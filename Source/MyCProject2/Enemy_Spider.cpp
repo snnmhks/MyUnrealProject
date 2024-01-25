@@ -50,8 +50,8 @@ void AEnemy_Spider::BeginPlay() {
 
 	EnemyMaxHP = 80;
 	EnemyCurrentHP = EnemyMaxHP;
-	EnemyDamage = 8;
-	EnemyGold = 20;
+	EnemyDamage = 20;
+	EnemyGold = 30;
 	AttackSpeed = 1.5f;
 	AttackRange = 300.0f;
 	AttackRadius = 50.0f;

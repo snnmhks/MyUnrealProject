@@ -27,12 +27,11 @@ public:
 	FTimerHandle DieTimerHandle;
 
 	float AttackSpeed;
+	float LDAttackSpeed;
 	float AttackRange;
 	float AttackRadius;
 	float LDAttackRange;
 	float LDAttackRadius;
-
-	float AddGiveGold;
 
 	EAttackState AS;
 
@@ -54,6 +53,8 @@ public:
 		float EnemyCurrentHP;
 	UPROPERTY(VisibleAnywhere)
 		float EnemyDamage;
+	UPROPERTY(VisibleAnywhere)
+		float EnemyLDDamage;
 	UPROPERTY(VisibleAnywhere)
 		int EnemyGold;
 
@@ -108,4 +109,7 @@ public:
 
 	// 죽으면 호출할 함수
 	void Diying();
+
+	// 고개 돌리는 함수
+	void TurnToPlayer();
 };

@@ -43,11 +43,11 @@ AEnemyParent::AEnemyParent()
 	EWidget->SetupAttachment(RootComponent);
 
 	AttackSpeed = 1.0f;
+	LDAttackSpeed = 1.0f;
 	AttackRange = 200.0f;
 	LDAttackRange = 0.0f;
 	AttackRadius = 50.0f;
-
-	AddGiveGold = 1.0f;
+	LDAttackRadius = 50.0f;
 }
 
 // Called when the game starts or when spawned
@@ -75,8 +75,7 @@ void AEnemyParent::BeginPlay()
 
 		// 고개 돌리는 노티파이
 		EnemyAnim->TurnCheck.AddLambda([this]()->void {
-			FRotator TargetRotation = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), TargetPlayer->GetActorLocation());
-			SetActorRotation(TargetRotation);
+			TurnToPlayer();
 		});
 
 		// 공격 타이밍에 맞춰 sweep trace를 실행
@@ -107,7 +106,8 @@ void AEnemyParent::BeginPlay()
 				AMyCharacter* SweepCharacter = Cast<AMyCharacter>(HitResult.GetActor());
 				if (SweepCharacter && !(SweepCharacter->ActionState == static_cast<int>(EActionState::STATE_Die))) {
 					PlayHittedEffect(HitResult.ImpactPoint);
-					SweepCharacter->DiffHP(-EnemyDamage);
+					if (AS == EAttackState::Basic_Attack) SweepCharacter->DiffHP(-EnemyDamage);
+					else if (AS == EAttackState::LD_Attack) SweepCharacter->DiffHP(-EnemyLDDamage);
 				}
 			}
 /*
@@ -153,6 +153,11 @@ void AEnemyParent::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 
 }
 
+void AEnemyParent::TurnToPlayer() {
+	FRotator TargetRotation = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), TargetPlayer->GetActorLocation());
+	SetActorRotation(TargetRotation);
+}
+
 void AEnemyParent::OnDamaged(float _Damage) {
 	if (IsDying) return;
 	EnemyCurrentHP -= _Damage;
@@ -169,6 +174,7 @@ void AEnemyParent::OnDamaged(float _Damage) {
 			GiveGold();
 			Cast<AEnemyAIController>(GetController())->StopBT();
 			EnemyAnim->StopCurrentMongtage();
+			TurnToPlayer();
 			EnemyAnim->PlayMongtage(DieMongtage);
 		}
 	}
@@ -184,7 +190,7 @@ float AEnemyParent::EnemyAttack() {
 float AEnemyParent::EnemyLDAttack() {
 	if (!IsValid(LDAttackMontage1)) return 0.0f;
 	AS = EAttackState::LD_Attack;
-	return EnemyAnim->Montage_Play(LDAttackMontage1, AttackSpeed, EMontagePlayReturnType::Duration);
+	return EnemyAnim->Montage_Play(LDAttackMontage1, LDAttackSpeed, EMontagePlayReturnType::Duration);
 }
 
 bool AEnemyParent::SetItemData() {
@@ -202,7 +208,7 @@ bool AEnemyParent::SetItemData() {
 
 void AEnemyParent::GiveGold() {
 	if (30 > FMath::RandRange(0, 100)) {
-		TargetPlayer->GoldDiff(EnemyGold * AddGiveGold);
+		TargetPlayer->GoldDiff(EnemyGold, true);
 	}
 }
 
